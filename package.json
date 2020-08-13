@@ -1,0 +1,30 @@
+{
+  "name": "twc-watchface",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@fitbit/sdk": "~4.1.0",
+    "@fitbit/sdk-cli": "^1.7.2"
+  },
+  "fitbit": {
+    "appUUID": "35906281-c11a-4cc8-bf3d-8db5d99cac75",
+    "appType": "clockface",
+    "appDisplayName": "Twc Watchface",
+    "iconFile": "resources/icon.png",
+    "wipeColor": "#ffffff",
+    "requestedPermissions": [],
+    "buildTargets": [
+      "higgs",
+      "meson",
+      "gemini",
+      "mira"
+    ],
+    "i18n": {},
+    "defaultLanguage": "en-US"
+  },
+  "scripts": {
+    "build": "fitbit-build",
+    "debug": "fitbit"
+  }
+}
