@@ -1,3 +1,5 @@
-<svg>
-  <rect id="background" />
+<svg viewport-fill="#000000">
+  <text id="clock" x="50%" y="70"
+      fill="#ffffff" font-size="70" font-family="System-Regular"
+      text-anchor="middle" text-length="20">Loading...</text>
 </svg>
