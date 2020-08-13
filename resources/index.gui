@@ -1,5 +1,13 @@
 <svg viewport-fill="#000000">
-  <text id="clock" x="50%" y="70"
-      fill="#ffffff" font-size="70" font-family="System-Regular"
-      text-anchor="middle" text-length="20">Loading...</text>
+  <defs>
+    <link rel="stylesheet" href="styles.css" />
+  </defs>
+  <section>
+    <text id="clock" x="50%" y="70" font-size="70" text-anchor="middle">Loading...</text>
+  </section>
+  <section>
+    <text fill="red" id="location" x="6" y="106" width="100%-6" font-size="35" text-overflow="ellipsis">Sofiivska Borschahivka</text>
+    <text id="temp" x="6" y="141" width="100%-6" font-size="35" text-overflow="ellipsis">18° Partly cloudy</text>
+    <text id="temp" x="6" y="177" width="100%-6" font-size="35" text-overflow="ellipsis">H:21° L:18°</text>
+  </section>
 </svg>

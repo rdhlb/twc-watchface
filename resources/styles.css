@@ -1,3 +1,13 @@
+text {
+  font-family: System-Regular;
+  fill: #ffffff;
+  font-weight: regular;
+}
+
+.test {
+  fill: red;
+}
+
 .defaultText {
   font-size: 32;
   font-family: System-Regular;
