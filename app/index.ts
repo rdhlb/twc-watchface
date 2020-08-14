@@ -1,16 +1,47 @@
-import document from "document";
-import clock from "clock";
 import { memory } from "system";
+import * as messaging from "messaging";
+import { display } from "display";
 
-let myClock = document.getElementById("clock");
-
-clock.granularity = 'minutes';
+import './clock';
+import { processWeatherData } from './weather';
+import document from 'document';
 
 // TODO: add hidden page that shows memory usage
+// TODO: find out how to move lines with keyboard
 
-clock.ontick = function(evt) {
-  const hours = evt.date.getHours();
-  const minutes = evt.date.getMinutes();
-  myClock.text = ("0" + hours).slice(-2) + ":" + ("0" + minutes).slice(-2);
-  console.log("JS memory: " + memory.js.used + "/" + memory.js.total);
+const memoryNode = document.getElementById('mem');
+
+display.addEventListener("change", () => {
+  if (display.on) {
+    setInterval(() => {
+      memoryNode.text = `Memory usage: ${memory.js.used}/${memory.js.total}`;
+    }, 1000);
+  }
+});
+
+const startWeatherPolling = () => setInterval(fetchWeather, 5 * 1000 * 60); // 5 minutes
+
+function fetchWeather() {
+    messaging.peerSocket.send({
+      command: 'weather'
+    });
 };
+
+messaging.peerSocket.onopen = function() {
+  if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
+    fetchWeather();
+  }
+}
+
+messaging.peerSocket.onmessage = function(evt) {
+  if (evt.data) {
+    // TODO: should be somehow marked that this is weather response
+    processWeatherData(evt.data);
+  }
+}
+
+messaging.peerSocket.onerror = function(err) {
+  console.log("Connection error: " + err.code + " - " + err.message);
+}
+
+startWeatherPolling();
