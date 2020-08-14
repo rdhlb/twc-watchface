@@ -10,12 +10,17 @@ import document from 'document';
 // TODO: find out how to move lines with keyboard
 
 const memoryNode = document.getElementById('mem');
+const errorNode = document.getElementById('error');
+let memoryIntervalId = null;
 
 display.addEventListener("change", () => {
+  console.log(display.on, memoryIntervalId);
   if (display.on) {
-    setInterval(() => {
+    memoryIntervalId = setInterval(() => {
       memoryNode.text = `Memory usage: ${memory.js.used}/${memory.js.total}`;
     }, 1000);
+  } else {
+    clearInterval(memoryIntervalId);
   }
 });
 
@@ -42,6 +47,7 @@ messaging.peerSocket.onmessage = function(evt) {
 
 messaging.peerSocket.onerror = function(err) {
   console.log("Connection error: " + err.code + " - " + err.message);
+  errorNode.text = err.message;
 }
 
 startWeatherPolling();
