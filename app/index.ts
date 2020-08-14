@@ -1,30 +1,13 @@
-import { memory } from 'system';
 import * as messaging from 'messaging';
-import { display } from 'display';
-
-import './clock';
-import { processWeatherData } from './weather';
 import document from 'document';
 
+import './memoryMonitor';
+import './clock';
+import { processWeatherData } from './weather';
+
 // TODO: add hidden page that shows memory usage
-// TODO: find out how to move lines with keyboard
 // TODO: revise permissions that I request
-
-const memoryNode = document.getElementById('mem');
 const errorNode = document.getElementById('error');
-let memoryIntervalId = null;
-
-display.addEventListener('change', () => {
-  console.log(display.on, memoryIntervalId);
-  if (display.on) {
-    memoryIntervalId = setInterval(() => {
-      memoryNode.text = `Memory usage: ${memory.js.used}/${memory.js.total}`;
-    }, 1000);
-  } else {
-    clearInterval(memoryIntervalId);
-  }
-});
-
 const startWeatherPolling = () => setInterval(fetchWeather, 5 * 1000 * 60); // 5 minutes
 
 function fetchWeather() {

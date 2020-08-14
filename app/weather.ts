@@ -1,7 +1,7 @@
 import document from 'document';
 
 export function processWeatherData(data) {
-  renderCity(data.city);
+  renderLocation(data.location);
   renderCurrentWeather(data.temp, data.description);
   renderHighLowTemp(data.temp_min, data.temp_max);
 }
@@ -10,7 +10,7 @@ const cityNode = document.getElementById('location');
 const currentWeatherNode = document.getElementById('currTemp');
 const highLowTempNode = document.getElementById('highLowTemp');
 
-const renderCity = (city) => {
+const renderLocation = (city) => {
   cityNode.text = city;
 };
 
