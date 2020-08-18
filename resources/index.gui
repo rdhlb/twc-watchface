@@ -11,6 +11,9 @@
     <text id="highLowTemp" x="6" y="180" width="100%-6" font-size="35" text-overflow="ellipsis" text-length="40">H:--° L:--°</text>
   </section>
   <section>
+    <text id="open" fill="yellow" x="6" y="206" width="100%-6" font-size="16" text-length="40">...</text>
+  </section>
+  <section>
     <text id="close" fill="yellow" x="6" y="222" width="100%-6" font-size="16" text-length="40">...</text>
   </section>
   <section>
