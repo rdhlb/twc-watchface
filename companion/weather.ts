@@ -7,6 +7,7 @@ type OptionsType = {
 };
 
 export const queryOpenWeather = ({ options, onSuccess }: { options: OptionsType; onSuccess: (any) => void }) => {
+  // TODO: add query bilder from JS object
   const locationQuery = `?lat=${options.lat}&lon=${options.lon}`;
   const URL = OPENWEATHERMAP_ENDPOINT + locationQuery + '&units=metric' + '&APPID=' + OPENWEATHERMAP_API_KEY;
   console.log(URL);
