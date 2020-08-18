@@ -8,16 +8,19 @@ import { processWeatherData } from './weather';
 
 // TODO: add hidden page that shows memory usage
 // TODO: revise permissions that I request
+
+// TODO: rewrite to just periodically send weather/calendar data from companion app?
+
 const errorNode = document.getElementById('error');
 const closeNode = document.getElementById('error');
 const lastMessageNode = document.getElementById('lastMessage');
 const lastSyncTimeNode = document.getElementById('lastSyncTime');
-const startWeatherPolling = () => setInterval(fetchWeather, 5 * 1000 * 60); // 5 minutes
+const startWeatherPolling = () => setInterval(fetchWeather, 0.5 * 1000 * 60); // 5 minutes
 let lastTime = Date.now();
 
 function fetchWeather() {
-  lastMessageNode.text = 'fetchWeather invoked';
-  lastSyncTimeNode.text = device.lastSyncTime?.toLocaleDateString();
+  lastMessageNode.text = `fetchWeather invoked. socket: ${messaging.peerSocket.bufferedAmount}, ${messaging.peerSocket.readyState}`;
+  lastSyncTimeNode.text = device.lastSyncTime?.toLocaleTimeString();
 
   if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
     lastMessageNode.text = 'peerSocket in Open state';
