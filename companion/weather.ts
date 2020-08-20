@@ -10,11 +10,11 @@ export const queryOpenWeather = ({ options, onSuccess }: { options: OptionsType;
   // TODO: add query bilder from JS object
   const locationQuery = `?lat=${options.lat}&lon=${options.lon}`;
   const URL = OPENWEATHERMAP_ENDPOINT + locationQuery + '&units=metric' + '&APPID=' + OPENWEATHERMAP_API_KEY;
-  console.log(URL);
+  // console.log(URL);
   fetch(URL)
     .then(function (response) {
       response.json().then(function (data) {
-        console.log(JSON.stringify(data, null, 1));
+        // console.log(JSON.stringify(data, null, 1));
         onSuccess({
           ...data.main,
           location: data.name,

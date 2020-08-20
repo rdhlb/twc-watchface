@@ -1,0 +1,8 @@
+<svg viewport-fill="#000000">
+  <section>
+    <text id="button" fill="white" x="6" y="65" font-size="24" pointer-events="visible">Back button</text>
+  </section>
+  <section>
+    <text id="mem" x="6" y="286" width="100%-6" font-size="16" text-length="40">Memory usage: 0/0</text>
+  </section>
+</svg>
