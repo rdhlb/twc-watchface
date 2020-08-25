@@ -10,22 +10,24 @@
     <text id="currTemp" x="6" y="143" width="100%-6" font-size="35" text-overflow="ellipsis" text-length="40">Loading weather...</text>
     <text id="highLowTemp" x="6" y="180" width="100%-6" font-size="35" text-overflow="ellipsis" text-length="40">H:--° L:--°</text>
   </section>
-  <section>
-    <text id="open" fill="yellow" x="6" y="206" width="100%-6" font-size="16" text-length="40">onopen at __</text>
-  </section>
-  <section>
-    <text id="close" fill="yellow" x="6" y="222" width="100%-6" font-size="16" text-length="40">onclose at __</text>
-  </section>
-  <section>
-    <text id="error" fill="red" x="6" y="238" width="100%-6" font-size="14" text-length="40">no errors</text>
-  </section>
-  <section>
-    <text id="lastSyncTime" fill="green" x="6" y="254" width="100%-6" font-size="16" text-length="40" pointer-events="visible">Last sync time</text>
-  </section>
-  <section>
-    <text id="lastMessage" fill="cyan" x="6" y="270" width="100%-6" font-size="16" text-length="40">Last message received</text>
-  </section>
-  <section>
-    <text id="mem" x="6" y="286" width="100%-6" font-size="16" text-length="40">Memory usage: 0/0</text>
-  </section>
+  <svg id="logs" class="logs" viewport-fill="#000000">
+    <section>
+      <text id="open" fill="yellow" x="6" y="206" width="100%-6" font-size="16" text-length="40">onopen at __</text>
+    </section>
+    <section>
+      <text id="close" fill="yellow" x="6" y="222" width="100%-6" font-size="16" text-length="40">onclose at __</text>
+    </section>
+    <section>
+      <text id="error" fill="red" x="6" y="238" width="100%-6" font-size="14" text-length="40">no errors</text>
+    </section>
+    <section>
+      <text id="lastSyncTime" fill="green" x="6" y="254" width="100%-6" font-size="16" text-length="40" pointer-events="visible">Last sync time</text>
+    </section>
+    <section>
+      <text id="lastMessage" fill="cyan" x="6" y="270" width="100%-6" font-size="16" text-length="40">Last message received</text>
+    </section>
+    <section>
+      <text id="mem" x="6" y="286" width="100%-6" font-size="16" text-length="40">Memory usage: 0/0</text>
+    </section>
+  </svg>
 </svg>

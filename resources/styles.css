@@ -20,3 +20,11 @@ text {
   height: 100%;
   fill: white;
 }
+
+.logs {
+  display: none;
+}
+
+.logsVisible {
+  display: inline;
+}

@@ -17,7 +17,6 @@ const renderMemoryUsage = () => {
   const memoryNode = document.getElementById('mem');
   memoryNode.text = `Memory usage: ${memory.js.used}/${memory.js.total}`;
   memoryCounterIntervalId = setInterval(() => {
-    console.log('memory interval');
     memoryNode.text = `Memory usage: ${memory.js.used}/${memory.js.total}`;
   }, 1000);
 };

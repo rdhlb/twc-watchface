@@ -7,11 +7,9 @@ import { memory } from 'system';
 
 const WEATHER_REQUEST_INTERVAL = 15 * 1000 * 60;
 
-// TODO: handle AM/PM setting
-// TODO: refactor ontick function (rethink slices)
-
 let weatherPollingInervalId;
 let memoryCounterIntervalId;
+let clockPressTime;
 
 const routes = {
   calendar: {
@@ -39,10 +37,25 @@ const renderClock = (container) => {
   };
 };
 
+const handleClockMouseDown = (e) => {
+  clockPressTime = Date.now();
+};
+
+const handleClockLongPress = (e) => {
+  const clockUnPressTime = Date.now();
+  const isTimeUp = clockUnPressTime - clockPressTime > 1500;
+  if (isTimeUp) {
+    const logsNode = document.getElementById('logs');
+    logsNode.class = logsNode.class === 'logsVisible' ? 'logs' : 'logsVisible';
+  }
+};
+
 const initView = () => {
   let myClock = document.getElementById('clock');
   renderClock(myClock);
   myClock.onclick = navigateTo(routes.calendar);
+  myClock.onmousedown = handleClockMouseDown;
+  myClock.onmouseup = handleClockLongPress;
   const startWeatherPolling = initPeerCommunication();
   weatherPollingInervalId = startWeatherPolling();
   renderSyncTime();
@@ -54,7 +67,6 @@ const renderMemoryUsage = () => {
   const memoryNode = document.getElementById('mem');
   memoryNode.text = `Memory usage: ${memory.js.used}/${memory.js.total}`;
   memoryCounterIntervalId = setInterval(() => {
-    console.log('memory update in index');
     memoryNode.text = `Memory usage: ${memory.js.used}/${memory.js.total}`;
   }, 1000);
 };
@@ -139,14 +151,9 @@ const initPeerCommunication = () => {
   const startWeatherPolling = () => {
     fetchWeather();
     return setInterval(fetchWeather, WEATHER_REQUEST_INTERVAL);
-  }; // 30 seconds
+  };
 
   return startWeatherPolling;
 };
-
-// TODO: add hidden page that shows memory usage
-// TODO: revise permissions that I request
-// TODO: use display.poke to prolong display on time after view changing
-// TODO: rewrite to just periodically send weather/calendar data from companion app?
 
 initView();
