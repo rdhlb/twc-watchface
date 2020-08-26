@@ -22,7 +22,8 @@
       "access_internet",
       "access_location",
       "run_background",
-      "access_user_profile"
+      "access_user_profile",
+      "access_calendars"
     ],
     "buildTargets": [
       "higgs",

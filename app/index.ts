@@ -8,6 +8,7 @@ import { startMemoryMonitoring, stopMemoryMonitoring } from './utils';
 import { COMMUNICATION_ACTIONS } from '../common/constants';
 
 const WEATHER_REQUEST_INTERVAL = 15 * 1000 * 60;
+const CALENDAR_REQUEST_INTERVAL = 15 * 1000 * 60;
 
 let weatherPollingInervalId;
 let memoryMonitorIntervalId;
@@ -16,6 +17,7 @@ let socketOpenTime;
 let socketErrorMessage;
 let socketCloseMessage;
 let lastMessageReceivedTime;
+let calendarPollingInervalId;
 
 const routes = {
   calendar: {
@@ -70,6 +72,7 @@ const initView = () => {
   myClock.onmousedown = handleClockMouseDown;
   myClock.onmouseup = handleClockLongPress;
   weatherPollingInervalId = startWeatherPolling();
+  calendarPollingInervalId = startCalendarPolling();
   renderSyncTime();
   memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
   display.addEventListener('change', onDisplayStatusChange);
@@ -83,6 +86,7 @@ const renderMemoryUsage = (used, total) => {
 const cleanUpView = () => {
   clock.granularity = 'off';
   clearInterval(weatherPollingInervalId);
+  clearInterval(calendarPollingInervalId);
   stopMemoryMonitoring(memoryMonitorIntervalId);
   display.removeEventListener('change', onDisplayStatusChange);
 };
@@ -121,6 +125,14 @@ const fetchWeather = () => {
   }
 };
 
+const fetchCalendarEvents = () => {
+  if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
+    messaging.peerSocket.send({
+      command: COMMUNICATION_ACTIONS.CALENDAR_EVENTS_REQUEST
+    });
+  }
+};
+
 const renderOnOpenTime = () => {
   const openNode = document.getElementById('open');
   openNode.text = `onopen at ${socketOpenTime.getHours()}:${socketOpenTime.getMinutes()}:${socketOpenTime.getSeconds()}`;
@@ -144,6 +156,7 @@ const renderLastMessageReceivedTime = () => {
 messaging.peerSocket.onopen = () => {
   socketOpenTime = new Date();
   fetchWeather();
+  fetchCalendarEvents();
 };
 
 messaging.peerSocket.onerror = function (err) {
@@ -156,22 +169,44 @@ messaging.peerSocket.onclose = function (data) {
 
 messaging.peerSocket.onmessage = ({ data: { command, data } }) => {
   lastMessageReceivedTime = new Date();
-  const cityNode = document.getElementById('location');
-  const currentWeatherNode = document.getElementById('currTemp');
-  const highLowTempNode = document.getElementById('highLowTemp');
 
+  // TODO: Use dynamic distpatch
   if (command === COMMUNICATION_ACTIONS.WEATHER_RESPONSE) {
+    const cityNode = document.getElementById('location');
+    const currentWeatherNode = document.getElementById('currTemp');
+    const highLowTempNode = document.getElementById('highLowTemp');
+
     cityNode.text = data.location;
     currentWeatherNode.text = `${data.temp.toFixed(0)}° ${
       data.description.charAt(0).toUpperCase() + data.description.slice(1)
     }`;
     highLowTempNode.text = `H:${data.temp_min.toFixed(0)}° L:${data.temp_max.toFixed(0)}°`;
+  } else if (command === COMMUNICATION_ACTIONS.CALENDAR_EVENTS_RESPONSE) {
+    const calendarEventTimeNode = document.getElementById('calendarEventTime');
+    const calendarEventDescriptionNode = document.getElementById('calendarEventDescription');
+    let calendarEvent;
+    try {
+      calendarEvent = JSON.parse(data);
+    } catch (error) {
+      console.log('error parsing calendar event', error);
+    }
+    const { startDate, endDate, title } = calendarEvent;
+    const startTime = new Date(startDate);
+    const endTime = new Date(endDate);
+
+    calendarEventTimeNode.text = `${startTime.getHours()}:${startTime.getMinutes()}-${endTime.getHours()}:${endTime.getMinutes()}`;
+    calendarEventDescriptionNode.text = title;
   }
 };
 
 const startWeatherPolling = () => {
   fetchWeather();
   return setInterval(fetchWeather, WEATHER_REQUEST_INTERVAL);
+};
+
+const startCalendarPolling = () => {
+  fetchCalendarEvents();
+  return setInterval(fetchCalendarEvents, CALENDAR_REQUEST_INTERVAL);
 };
 
 initView();

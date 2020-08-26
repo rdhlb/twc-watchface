@@ -1,4 +1,5 @@
 import * as messaging from 'messaging';
+import calendars from 'calendars';
 
 import { getCurrentPosition } from './location';
 import { queryOpenWeather } from './weather';
@@ -12,11 +13,33 @@ const sendWeatherData = (data) => {
   }
 };
 
-messaging.peerSocket.onmessage = function (evt) {
-  if (evt.data?.command == COMMUNICATION_ACTIONS.WEATHER_REQUEST) {
-    getCurrentPosition({ onSuccess: queryWeatherData, onError: onGetPositionError });
+const sendCalendarEvents = (data) => {
+  if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
+    messaging.peerSocket.send({ command: COMMUNICATION_ACTIONS.CALENDAR_EVENTS_RESPONSE, data });
+  } else {
+    console.log('Error: Connection is not open');
   }
 };
+
+const getCalendarEvents = ({ onSuccess }) => {
+  const start = new Date();
+  const end = new Date();
+  end.setHours(23, 59, 59, 999);
+  const eventsQuery = { startDate: start, endDate: end };
+
+  calendars.searchEvents(eventsQuery).then((todayEvents) => {
+    const { title, startDate, endDate } = todayEvents[0] || {};
+    onSuccess(JSON.stringify({ title, startDate, endDate })); // TODO: add try/catch
+  });
+};
+
+const commandsMap = {
+  [COMMUNICATION_ACTIONS.WEATHER_REQUEST]: () =>
+    getCurrentPosition({ onSuccess: queryWeatherData, onError: onGetPositionError }),
+  [COMMUNICATION_ACTIONS.CALENDAR_EVENTS_REQUEST]: () => getCalendarEvents({ onSuccess: sendCalendarEvents })
+};
+
+messaging.peerSocket.onmessage = (evt) => commandsMap[evt.data?.command]();
 
 messaging.peerSocket.onerror = function (err) {
   console.log('Connection error: ' + err.code + ' - ' + err.message);
