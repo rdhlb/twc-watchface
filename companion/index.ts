@@ -2,18 +2,18 @@ import * as messaging from 'messaging';
 
 import { getCurrentPosition } from './location';
 import { queryOpenWeather } from './weather';
-import { COMM_COMMANDS } from '../common/constants';
+import { COMMUNICATION_ACTIONS } from '../common/constants';
 
-const returnWeatherData = (data) => {
+const sendWeatherData = (data) => {
   if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
-    messaging.peerSocket.send(data);
+    messaging.peerSocket.send({ command: COMMUNICATION_ACTIONS.WEATHER_RESPONSE, data });
   } else {
     console.log('Error: Connection is not open');
   }
 };
 
 messaging.peerSocket.onmessage = function (evt) {
-  if (evt.data?.command == COMM_COMMANDS.WEATHER) {
+  if (evt.data?.command == COMMUNICATION_ACTIONS.WEATHER_REQUEST) {
     getCurrentPosition({ onSuccess: queryWeatherData, onError: onGetPositionError });
   }
 };
@@ -28,7 +28,7 @@ const queryWeatherData = (position) => {
 
   queryOpenWeather({
     options: { lat, lon },
-    onSuccess: returnWeatherData
+    onSuccess: sendWeatherData
   });
 };
 

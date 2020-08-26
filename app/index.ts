@@ -3,13 +3,19 @@ import document from 'document';
 import { me as device } from 'device';
 import clock from 'clock';
 import { display } from 'display';
-import { memory } from 'system';
+
+import { startMemoryMonitoring, stopMemoryMonitoring } from './utils';
+import { COMMUNICATION_ACTIONS } from '../common/constants';
 
 const WEATHER_REQUEST_INTERVAL = 15 * 1000 * 60;
 
 let weatherPollingInervalId;
-let memoryCounterIntervalId;
+let memoryMonitorIntervalId;
 let clockPressTime;
+let socketOpenTime;
+let socketErrorMessage;
+let socketCloseMessage;
+let lastMessageReceivedTime;
 
 const routes = {
   calendar: {
@@ -19,11 +25,10 @@ const routes = {
 };
 
 const onDisplayStatusChange = () => {
-  console.log('display change event in index');
   if (!display.on) {
-    clearInterval(memoryCounterIntervalId);
+    stopMemoryMonitoring(memoryMonitorIntervalId);
   } else {
-    renderMemoryUsage();
+    memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
   }
 };
 
@@ -42,11 +47,19 @@ const handleClockMouseDown = (e) => {
 };
 
 const handleClockLongPress = (e) => {
+  const logsNode = document.getElementById('logs');
   const clockUnPressTime = Date.now();
   const isTimeUp = clockUnPressTime - clockPressTime > 1500;
-  if (isTimeUp) {
-    const logsNode = document.getElementById('logs');
-    logsNode.class = logsNode.class === 'logsVisible' ? 'logs' : 'logsVisible';
+  const logsHidden = logsNode.class === 'logs';
+
+  if (isTimeUp && logsHidden) {
+    logsNode.class = 'logsVisible';
+    renderOnOpenTime();
+    renderSocketErrorMessage();
+    renderSocketCloseMessage();
+    renderLastMessageReceivedTime();
+  } else {
+    logsNode.class = 'logs';
   }
 };
 
@@ -56,25 +69,21 @@ const initView = () => {
   myClock.onclick = navigateTo(routes.calendar);
   myClock.onmousedown = handleClockMouseDown;
   myClock.onmouseup = handleClockLongPress;
-  const startWeatherPolling = initPeerCommunication();
   weatherPollingInervalId = startWeatherPolling();
   renderSyncTime();
-  renderMemoryUsage();
+  memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
   display.addEventListener('change', onDisplayStatusChange);
 };
 
-const renderMemoryUsage = () => {
+const renderMemoryUsage = (used, total) => {
   const memoryNode = document.getElementById('mem');
-  memoryNode.text = `Memory usage: ${memory.js.used}/${memory.js.total}`;
-  memoryCounterIntervalId = setInterval(() => {
-    memoryNode.text = `Memory usage: ${memory.js.used}/${memory.js.total}`;
-  }, 1000);
+  memoryNode.text = `Memory usage: ${used}/${total}`;
 };
 
 const cleanUpView = () => {
   clock.granularity = 'off';
   clearInterval(weatherPollingInervalId);
-  clearInterval(memoryCounterIntervalId);
+  stopMemoryMonitoring(memoryMonitorIntervalId);
   display.removeEventListener('change', onDisplayStatusChange);
 };
 
@@ -104,56 +113,65 @@ const renderSyncTime = () => {
   };
 };
 
-const initPeerCommunication = () => {
+const fetchWeather = () => {
+  if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
+    messaging.peerSocket.send({
+      command: COMMUNICATION_ACTIONS.WEATHER_REQUEST
+    });
+  }
+};
+
+const renderOnOpenTime = () => {
+  const openNode = document.getElementById('open');
+  openNode.text = `onopen at ${socketOpenTime.getHours()}:${socketOpenTime.getMinutes()}:${socketOpenTime.getSeconds()}`;
+};
+
+const renderSocketErrorMessage = () => {
   const errorNode = document.getElementById('error');
+  errorNode.text = socketErrorMessage;
+};
+
+const renderSocketCloseMessage = () => {
   const closeNode = document.getElementById('close');
+  closeNode.text = socketCloseMessage;
+};
+
+const renderLastMessageReceivedTime = () => {
+  const lastMessageNode = document.getElementById('lastMessage');
+  lastMessageNode.text = `Last message received at ${lastMessageReceivedTime.getHours()}:${lastMessageReceivedTime.getMinutes()}:${lastMessageReceivedTime.getSeconds()}`;
+};
+
+messaging.peerSocket.onopen = () => {
+  socketOpenTime = new Date();
+  fetchWeather();
+};
+
+messaging.peerSocket.onerror = function (err) {
+  socketErrorMessage = `Code: ${err.code}; ${err.message}`;
+};
+
+messaging.peerSocket.onclose = function (data) {
+  socketCloseMessage = `Code: ${data.code}, WasClean: ${data.wasClean}, Time: ${new Date().toTimeString()}`;
+};
+
+messaging.peerSocket.onmessage = ({ data: { command, data } }) => {
+  lastMessageReceivedTime = new Date();
   const cityNode = document.getElementById('location');
   const currentWeatherNode = document.getElementById('currTemp');
   const highLowTempNode = document.getElementById('highLowTemp');
-  const openNode = document.getElementById('open');
-  const lastMessageNode = document.getElementById('lastMessage');
 
-  const fetchWeather = () => {
-    if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
-      messaging.peerSocket.send({
-        command: 'weather'
-      });
-    }
-  };
+  if (command === COMMUNICATION_ACTIONS.WEATHER_RESPONSE) {
+    cityNode.text = data.location;
+    currentWeatherNode.text = `${data.temp.toFixed(0)}° ${
+      data.description.charAt(0).toUpperCase() + data.description.slice(1)
+    }`;
+    highLowTempNode.text = `H:${data.temp_min.toFixed(0)}° L:${data.temp_max.toFixed(0)}°`;
+  }
+};
 
-  messaging.peerSocket.onopen = () => {
-    const date = new Date();
-    openNode.text = `onopen at ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-    fetchWeather();
-  };
-
-  messaging.peerSocket.onmessage = ({ data }) => {
-    const date = new Date();
-    lastMessageNode.text = `Last message received at ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-    if (data) {
-      // TODO: should be somehow marked that this is weather response
-      cityNode.text = data.location;
-      currentWeatherNode.text = `${data.temp.toFixed(0)}° ${
-        data.description.charAt(0).toUpperCase() + data.description.slice(1)
-      }`;
-      highLowTempNode.text = `H:${data.temp_min.toFixed(0)}° L:${data.temp_max.toFixed(0)}°`;
-    }
-  };
-
-  messaging.peerSocket.onerror = function (err) {
-    errorNode.text = `Code: ${err.code}; ${err.message}`;
-  };
-
-  messaging.peerSocket.onclose = function (data) {
-    closeNode.text = `Code: ${data.code}, WasClean: ${data.wasClean}, Time: ${new Date().toTimeString()}`;
-  };
-
-  const startWeatherPolling = () => {
-    fetchWeather();
-    return setInterval(fetchWeather, WEATHER_REQUEST_INTERVAL);
-  };
-
-  return startWeatherPolling;
+const startWeatherPolling = () => {
+  fetchWeather();
+  return setInterval(fetchWeather, WEATHER_REQUEST_INTERVAL);
 };
 
 initView();
