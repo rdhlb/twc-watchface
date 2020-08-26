@@ -16,17 +16,13 @@
     "iconFile": "resources/icon.png",
     "wipeColor": "#ffffff",
     "requestedPermissions": [
-      "access_activity",
-      "access_exercise",
-      "access_heart_rate",
       "access_internet",
       "access_location",
       "run_background",
       "access_user_profile",
-      "access_calendars"
+      "access_calendar"
     ],
     "buildTargets": [
-      "higgs",
       "meson",
       "gemini",
       "mira"
