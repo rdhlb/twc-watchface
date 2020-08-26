@@ -13,7 +13,7 @@
   <section>
     <line x1="12" y1="196" x2="12" y2="288" fill="red" stroke-width="6" />
     <text id="calendarEventTime" x="20" y="220" fill="red" text-length="40">Calendar</text>
-    <textarea id="calendarEventDescription" rows="2" x="20" y="224" fill="white" width="100%-20" text-overflow="ellipsis">No scheduled events for today</textarea>
+    <textarea id="calendarEventDescription" rows="2" x="20" y="224" fill="white" width="100%-20" text-overflow="ellipsis" text-length="40">No scheduled events for today</textarea>
   </section>
   <svg id="logs" class="logs" viewport-fill="#000000" fill="#000000">
     <section>

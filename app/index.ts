@@ -4,7 +4,7 @@ import { me as device } from 'device';
 import clock from 'clock';
 import { display } from 'display';
 
-import { startMemoryMonitoring, stopMemoryMonitoring } from './utils';
+import { startMemoryMonitoring, stopMemoryMonitoring, getTimeString } from './utils';
 import { COMMUNICATION_ACTIONS } from '../common/constants';
 
 const WEATHER_REQUEST_INTERVAL = 15 * 1000 * 60;
@@ -37,10 +37,7 @@ const onDisplayStatusChange = () => {
 const renderClock = (container) => {
   clock.granularity = 'seconds';
   clock.ontick = ({ date }) => {
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const seconds = date.getSeconds();
-    container.text = ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2) + ':' + ('0' + seconds).slice(-2);
+    container.text = getTimeString(date);
   };
 };
 
@@ -135,7 +132,7 @@ const fetchCalendarEvents = () => {
 
 const renderOnOpenTime = () => {
   const openNode = document.getElementById('open');
-  openNode.text = `onopen at ${socketOpenTime.getHours()}:${socketOpenTime.getMinutes()}:${socketOpenTime.getSeconds()}`;
+  openNode.text = `onopen at ${getTimeString(socketOpenTime)}`;
 };
 
 const renderSocketErrorMessage = () => {
@@ -150,7 +147,7 @@ const renderSocketCloseMessage = () => {
 
 const renderLastMessageReceivedTime = () => {
   const lastMessageNode = document.getElementById('lastMessage');
-  lastMessageNode.text = `Last message received at ${lastMessageReceivedTime.getHours()}:${lastMessageReceivedTime.getMinutes()}:${lastMessageReceivedTime.getSeconds()}`;
+  lastMessageNode.text = `Last message received at ${getTimeString(lastMessageReceivedTime)}`;
 };
 
 messaging.peerSocket.onopen = () => {
@@ -191,11 +188,14 @@ messaging.peerSocket.onmessage = ({ data: { command, data } }) => {
       console.log('error parsing calendar event', error);
     }
     const { startDate, endDate, title } = calendarEvent;
-    const startTime = new Date(startDate);
-    const endTime = new Date(endDate);
 
-    calendarEventTimeNode.text = `${startTime.getHours()}:${startTime.getMinutes()}-${endTime.getHours()}:${endTime.getMinutes()}`;
-    calendarEventDescriptionNode.text = title;
+    if (startDate && endDate && title) {
+      const startTime = new Date(startDate);
+      const endTime = new Date(endDate);
+
+      calendarEventTimeNode.text = `${getTimeString(startTime)}-${getTimeString(endTime)}`;
+      calendarEventDescriptionNode.text = title;
+    }
   }
 };
 
