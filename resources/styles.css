@@ -1,8 +1,21 @@
 text {
   font-family: System-Regular;
-  fill: #ffffff;
-  font-weight: regular;
-  /* text-length: 32; */
+  fill: fb-white;
+}
+
+.main-clock {
+  font-size: 68;
+  text-anchor: end;
+}
+
+.weather-text {
+  font-size: 35;
+  width: 100%;
+  text-overflow: ellipsis;
+}
+
+.weather-location {
+  fill: fb-blue;
 }
 
 .logs {
@@ -11,4 +24,21 @@ text {
 
 .logsVisible {
   display: inline;
+}
+
+.event-marker {
+  fill: fb-blue;
+  stroke-width: 6;
+}
+
+.event-time {
+  fill: fb-blue;
+  font-size: 28;
+}
+
+.event-title {
+  width: 100%;
+  font-size: 30;
+  text-overflow: ellipsis;
+  fill: fb-white;
 }
