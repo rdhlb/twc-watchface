@@ -28,7 +28,8 @@ const getCalendarEvents = ({ onSuccess }) => {
   const eventsQuery = { startDate: start, endDate: end };
 
   calendars.searchEvents(eventsQuery).then((todayEvents) => {
-    const { title, startDate, endDate } = todayEvents[0] || {};
+    const timeRestrictedEvents = todayEvents.filter((event) => !event.isAllDay);
+    const { title, startDate, endDate } = timeRestrictedEvents[0] || {};
     onSuccess(JSON.stringify({ title, startDate, endDate })); // TODO: add try/catch
   });
 };
