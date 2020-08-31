@@ -17,7 +17,7 @@ import { COMMUNICATION_ACTIONS } from '../common/constants';
 
 const WEATHER_REQUEST_INTERVAL = 15 * 1000 * 60;
 const CALENDAR_REQUEST_INTERVAL = 15 * 1000 * 60;
-const WEATHER_RESPONSE_TIMEOUT = 10000;
+const WEATHER_RESPONSE_TIMEOUT = 15 * 1000;
 
 let weatherPollingInervalId;
 let memoryMonitorIntervalId;
