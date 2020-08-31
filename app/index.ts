@@ -176,38 +176,53 @@ messaging.peerSocket.onclose = function (data) {
   socketCloseMessage = `Code: ${data.code}, WasClean: ${data.wasClean}, Time: ${new Date().toTimeString()}`;
 };
 
-messaging.peerSocket.onmessage = ({ data: { command, data } }) => {
+messaging.peerSocket.onmessage = ({ data: message }) => {
   lastMessageReceivedTime = new Date();
+  handleMessage(message);
+};
 
-  // TODO: Use dynamic distpatch
-  if (command === COMMUNICATION_ACTIONS.WEATHER_RESPONSE) {
-    const cityNode = document.getElementById('location');
-    const currentWeatherNode = document.getElementById('currTemp');
-    const highLowTempNode = document.getElementById('highLowTemp');
+const handleWeatherResponse = (data) => {
+  const cityNode = document.getElementById('location');
+  const currentWeatherNode = document.getElementById('currTemp');
+  const highLowTempNode = document.getElementById('highLowTemp');
 
-    cityNode.text = data.location;
-    currentWeatherNode.text = `${data.temp.toFixed(0)}° ${
-      data.description.charAt(0).toUpperCase() + data.description.slice(1)
-    }`;
-    highLowTempNode.text = `H:${data.temp_min.toFixed(0)}° L:${data.temp_max.toFixed(0)}°`;
-  } else if (command === COMMUNICATION_ACTIONS.CALENDAR_EVENTS_RESPONSE) {
-    const calendarEventTimeNode = document.getElementById('calendarEventTime');
-    const calendarEventDescriptionNode = document.getElementById('calendarEventDescription');
-    let calendarEvent;
-    try {
-      calendarEvent = JSON.parse(data);
-    } catch (error) {
-      console.log('error parsing calendar event', error);
-    }
-    const { startDate, endDate, title } = calendarEvent;
+  cityNode.text = data.location;
+  currentWeatherNode.text = `${data.temp.toFixed(0)}° ${
+    data.description.charAt(0).toUpperCase() + data.description.slice(1)
+  }`;
+  highLowTempNode.text = `H:${data.temp_min.toFixed(0)}° L:${data.temp_max.toFixed(0)}°`;
+};
 
-    if (startDate && endDate && title) {
-      const startTime = new Date(startDate);
-      const endTime = new Date(endDate);
+const handleCalendarResponse = (data) => {
+  const calendarEventTimeNode = document.getElementById('calendarEventTime');
+  const calendarEventDescriptionNode = document.getElementById('calendarEventDescription');
+  let calendarEvent;
+  try {
+    calendarEvent = JSON.parse(data);
+  } catch (error) {
+    console.log('error parsing calendar event', error);
+  }
+  const { startDate, endDate, title } = calendarEvent;
 
-      calendarEventTimeNode.text = `${getTimeString(startTime)}-${getTimeString(endTime)}`;
-      calendarEventDescriptionNode.text = title;
-    }
+  if (startDate && endDate && title) {
+    const startTime = new Date(startDate);
+    const endTime = new Date(endDate);
+
+    calendarEventTimeNode.text = `${getTimeString(startTime)}-${getTimeString(endTime)}`;
+    calendarEventDescriptionNode.text = title;
+  }
+};
+
+const messageHandlersMap = {
+  [COMMUNICATION_ACTIONS.WEATHER_RESPONSE]: handleWeatherResponse,
+  [COMMUNICATION_ACTIONS.CALENDAR_EVENTS_RESPONSE]: handleCalendarResponse
+};
+
+const handleMessage = ({ command, data }) => {
+  try {
+    messageHandlersMap[command](data);
+  } catch (error) {
+    console.log('No handler found for this type of message!');
   }
 };
 
