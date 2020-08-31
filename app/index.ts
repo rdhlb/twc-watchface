@@ -17,6 +17,7 @@ import { COMMUNICATION_ACTIONS } from '../common/constants';
 
 const WEATHER_REQUEST_INTERVAL = 15 * 1000 * 60;
 const CALENDAR_REQUEST_INTERVAL = 15 * 1000 * 60;
+const WEATHER_RESPONSE_TIMEOUT = 10000;
 
 let weatherPollingInervalId;
 let memoryMonitorIntervalId;
@@ -26,6 +27,7 @@ let socketCloseMessage;
 let lastMessageReceivedTime;
 let calendarPollingInervalId;
 let longPressTimeoutId;
+let noWeatherResponseTimeoutId;
 
 const routes = {
   calendar: {
@@ -132,10 +134,21 @@ const sendSocketMessage = (message) => {
   }
 };
 
-const fetchWeather = () =>
+const fetchWeather = () => {
+  const currentWeatherNode = document.getElementById('currTemp');
+  const isWeatherDataAvailable = currentWeatherNode.text !== 'No weather data';
+
+  if (!noWeatherResponseTimeoutId && !isWeatherDataAvailable) {
+    currentWeatherNode.text = 'Loading weather...';
+    noWeatherResponseTimeoutId = setTimeout(() => {
+      currentWeatherNode.text = 'No weather data';
+    }, WEATHER_RESPONSE_TIMEOUT);
+  }
+
   sendSocketMessage({
     command: COMMUNICATION_ACTIONS.WEATHER_REQUEST
   });
+};
 
 const fetchCalendarEvents = () =>
   sendSocketMessage({
@@ -182,6 +195,7 @@ messaging.peerSocket.onmessage = ({ data: message }) => {
 };
 
 const handleWeatherResponse = (data) => {
+  clearTimeout(noWeatherResponseTimeoutId);
   const cityNode = document.getElementById('location');
   const currentWeatherNode = document.getElementById('currTemp');
   const highLowTempNode = document.getElementById('highLowTemp');
