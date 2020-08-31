@@ -5,7 +5,6 @@ import { display } from 'display';
 let memoryCounterIntervalId;
 
 const onDisplayStatusChange = () => {
-  console.log('display change event in calendar');
   if (!display.on) {
     clearInterval(memoryCounterIntervalId);
   } else {
@@ -21,7 +20,7 @@ const renderMemoryUsage = () => {
   }, 1000);
 };
 
-export const initView = ({ back }) => {
+export const initView = (back: Function) => {
   const button = document.getElementById('button');
   button.addEventListener('click', onBackButtonClick(back));
 

@@ -1,3 +1,6 @@
+import document from 'document';
+import { display } from 'display';
+import { vibration } from 'haptics';
 import { memory } from 'system';
 import { DAYS_SHORT } from '../common/constants';
 
@@ -16,3 +19,16 @@ export const getTimeString = (date: Date) =>
 export const getCurrentDay = () => DAYS_SHORT[new Date().getDay()];
 
 export const getCurrentDate = () => new Date().getDate();
+
+export const navigate = ({ loadJs, guiPath }, back, cleanUpView) => () => {
+  vibration.start('bump');
+  cleanUpView();
+
+  loadJs()
+    .then(({ initView }) => {
+      document.replaceSync(guiPath);
+      initView(back);
+      display.poke();
+    })
+    .catch((e) => console.log(e));
+};

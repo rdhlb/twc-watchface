@@ -5,7 +5,14 @@ import clock from 'clock';
 import { display } from 'display';
 import { vibration } from 'haptics';
 
-import { startMemoryMonitoring, stopMemoryMonitoring, getTimeString, getCurrentDay, getCurrentDate } from './utils';
+import {
+  startMemoryMonitoring,
+  stopMemoryMonitoring,
+  getTimeString,
+  getCurrentDay,
+  getCurrentDate,
+  navigate
+} from './utils';
 import { COMMUNICATION_ACTIONS } from '../common/constants';
 
 const WEATHER_REQUEST_INTERVAL = 15 * 1000 * 60;
@@ -75,7 +82,7 @@ const renderDateAndDay = () => {
 const renderCalendarButton = () => {
   const hiddenCalButton = document.getElementById('hiddenCalButton');
 
-  hiddenCalButton.onclick = navigateTo(routes.calendar);
+  hiddenCalButton.onclick = navigate(routes.calendar, back, onViewCleanUp);
 };
 
 const initView = () => {
@@ -97,7 +104,7 @@ const renderMemoryUsage = (used, total) => {
   memoryNode.text = `Memory usage: ${used}/${total}`;
 };
 
-const cleanUpView = () => {
+const onViewCleanUp = () => {
   clock.granularity = 'off';
   clearInterval(weatherPollingInervalId);
   clearInterval(calendarPollingInervalId);
@@ -106,22 +113,9 @@ const cleanUpView = () => {
 };
 
 const back = () => {
+  vibration.start('bump');
   document.replaceSync('./resources/index.gui');
   initView();
-};
-
-const navigateTo = ({ loadJs, guiPath }) => () => {
-  // TODO: add haptic feedback here
-  cleanUpView();
-
-  loadJs()
-    .then(({ initView }) => {
-      document.replaceSync(guiPath);
-      initView({ back });
-    })
-    .catch((e) => console.log(e));
-
-  display.poke();
 };
 
 const renderSyncTime = () => {
