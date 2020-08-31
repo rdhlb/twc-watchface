@@ -3,6 +3,7 @@ import document from 'document';
 import { me as device } from 'device';
 import clock from 'clock';
 import { display } from 'display';
+import { vibration } from 'haptics';
 
 import { startMemoryMonitoring, stopMemoryMonitoring, getTimeString, getCurrentDay, getCurrentDate } from './utils';
 import { COMMUNICATION_ACTIONS } from '../common/constants';
@@ -12,12 +13,12 @@ const CALENDAR_REQUEST_INTERVAL = 15 * 1000 * 60;
 
 let weatherPollingInervalId;
 let memoryMonitorIntervalId;
-let clockPressTime;
 let socketOpenTime;
 let socketErrorMessage;
 let socketCloseMessage;
 let lastMessageReceivedTime;
 let calendarPollingInervalId;
+let longPressTimeoutId;
 
 const routes = {
   calendar: {
@@ -42,24 +43,25 @@ const renderClock = (container) => {
 };
 
 const handleClockMouseDown = (e) => {
-  clockPressTime = Date.now();
+  longPressTimeoutId = setTimeout(() => {
+    vibration.start('bump');
+    const logsNode = document.getElementById('logs');
+    const logsHidden = logsNode.class === 'logs';
+
+    if (logsHidden) {
+      logsNode.class = 'logs--visible';
+      renderOnOpenTime();
+      renderSocketErrorMessage();
+      renderSocketCloseMessage();
+      renderLastMessageReceivedTime();
+    } else {
+      logsNode.class = 'logs';
+    }
+  }, 1500);
 };
 
-const handleClockLongPress = (e) => {
-  const logsNode = document.getElementById('logs');
-  const clockUnPressTime = Date.now();
-  const isTimeUp = clockUnPressTime - clockPressTime > 1500;
-  const logsHidden = logsNode.class === 'logs';
-
-  if (isTimeUp && logsHidden) {
-    logsNode.class = 'logsVisible';
-    renderOnOpenTime();
-    renderSocketErrorMessage();
-    renderSocketCloseMessage();
-    renderLastMessageReceivedTime();
-  } else {
-    logsNode.class = 'logs';
-  }
+const handleClockMouseUp = (e) => {
+  clearTimeout(longPressTimeoutId);
 };
 
 const renderDateAndDay = () => {
@@ -70,18 +72,24 @@ const renderDateAndDay = () => {
   currentDateNode.text = String(getCurrentDate());
 };
 
+const renderCalendarButton = () => {
+  const hiddenCalButton = document.getElementById('hiddenCalButton');
+
+  hiddenCalButton.onclick = navigateTo(routes.calendar);
+};
+
 const initView = () => {
   const myClock = document.getElementById('clock');
   renderClock(myClock);
-  myClock.onclick = navigateTo(routes.calendar);
   myClock.onmousedown = handleClockMouseDown;
-  myClock.onmouseup = handleClockLongPress;
+  myClock.onmouseup = handleClockMouseUp;
   weatherPollingInervalId = startWeatherPolling();
   calendarPollingInervalId = startCalendarPolling();
   renderSyncTime();
   memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
   display.addEventListener('change', onDisplayStatusChange);
   renderDateAndDay();
+  renderCalendarButton();
 };
 
 const renderMemoryUsage = (used, total) => {
@@ -103,6 +111,7 @@ const back = () => {
 };
 
 const navigateTo = ({ loadJs, guiPath }) => () => {
+  // TODO: add haptic feedback here
   cleanUpView();
 
   loadJs()
@@ -119,25 +128,25 @@ const renderSyncTime = () => {
   const lastSyncTimeNode = document.getElementById('lastSyncTime');
   lastSyncTimeNode.text = `Last sync at ${device.lastSyncTime?.toString()}`;
   lastSyncTimeNode.onclick = () => {
-    lastSyncTimeNode.text = `Last sync at ${device.lastSyncTime?.toString()}`;
+    renderSyncTime();
   };
 };
 
-const fetchWeather = () => {
+const sendSocketMessage = (message) => {
   if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
-    messaging.peerSocket.send({
-      command: COMMUNICATION_ACTIONS.WEATHER_REQUEST
-    });
+    messaging.peerSocket.send(message);
   }
 };
 
-const fetchCalendarEvents = () => {
-  if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
-    messaging.peerSocket.send({
-      command: COMMUNICATION_ACTIONS.CALENDAR_EVENTS_REQUEST
-    });
-  }
-};
+const fetchWeather = () =>
+  sendSocketMessage({
+    command: COMMUNICATION_ACTIONS.WEATHER_REQUEST
+  });
+
+const fetchCalendarEvents = () =>
+  sendSocketMessage({
+    command: COMMUNICATION_ACTIONS.CALENDAR_EVENTS_REQUEST
+  });
 
 const renderOnOpenTime = () => {
   const openNode = document.getElementById('open');

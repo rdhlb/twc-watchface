@@ -22,7 +22,7 @@ text {
   display: none;
 }
 
-.logsVisible {
+.logs--visible {
   display: inline;
 }
 
@@ -52,4 +52,15 @@ text {
 .current-date {
   font-size: 40;
   text-anchor: middle;
+}
+
+.calendar-button {
+  opacity: 0;
+  width: 30%;
+  height: 72;
+}
+
+.logs-text {
+  width: 100%;
+  font-size: 14;
 }

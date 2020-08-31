@@ -5,6 +5,7 @@
   <section>
     <text id="dayOfWeek" class="day-of-week" x="17%" y="36" text-length="3">--</text>
     <text id="currentDate" class="current-date" x="17%" y="69" text-length="2">--</text>
+    <rect id="hiddenCalButton" class="calendar-button" pointer-events="visible" />
     <text id="clock" class="main-clock" x="90%" y="68" text-length="5" pointer-events="visible">--:--</text>
   </section>
   <section y="72">
@@ -17,24 +18,13 @@
     <text id="calendarEventTime" class="event-time" x="20" y="22" text-length="15">Calendar</text>
     <textarea id="calendarEventDescription" class="event-title" rows="2" x="20" y="26" text-length="70">No scheduled events for today</textarea>
   </section>
-  <svg id="logs" class="logs" viewport-fill="fb-black">
-    <section>
-      <text id="open" fill="yellow" x="6" y="206" width="100%-6" font-size="16" text-length="40">onopen at __</text>
-    </section>
-    <section>
-      <text id="close" fill="yellow" x="6" y="222" width="100%-6" font-size="16" text-length="40">onclose at __</text>
-    </section>
-    <section>
-      <text id="error" fill="red" x="6" y="238" width="100%-6" font-size="14" text-length="40">no errors</text>
-    </section>
-    <section>
-      <text id="lastSyncTime" fill="green" x="6" y="254" width="100%-6" font-size="16" text-length="40" pointer-events="visible">Last sync time</text>
-    </section>
-    <section>
-      <text id="lastMessage" fill="cyan" x="6" y="270" width="100%-6" font-size="16" text-length="40">Last message received</text>
-    </section>
-    <section>
-      <text id="mem" x="6" y="286" width="100%-6" font-size="16" text-length="40">Memory usage: 0/0</text>
-    </section>
+  <svg y="180" id="logs" class="logs">
+      <rect width="100%" height="100%" fill="fb-black" />
+      <text id="open" class="logs-text" fill="yellow" y="16" text-length="40">onopen at __</text>
+      <text id="close" class="logs-text" fill="yellow" y="32" text-length="40">onclose at __</text>
+      <text id="error" class="logs-text" fill="red" y="48" text-length="40">no errors</text>
+      <text id="lastSyncTime" class="logs-text" fill="green" y="64" text-length="40" pointer-events="visible">Last sync time</text>
+      <text id="lastMessage" class="logs-text" fill="cyan" y="80" text-length="40">Last message received</text>
+      <text id="mem" class="logs-text" y="96" text-length="40">Memory usage: 0/0</text>
   </svg>
 </svg>
