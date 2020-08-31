@@ -4,7 +4,7 @@ import { me as device } from 'device';
 import clock from 'clock';
 import { display } from 'display';
 
-import { startMemoryMonitoring, stopMemoryMonitoring, getTimeString } from './utils';
+import { startMemoryMonitoring, stopMemoryMonitoring, getTimeString, getCurrentDay, getCurrentDate } from './utils';
 import { COMMUNICATION_ACTIONS } from '../common/constants';
 
 const WEATHER_REQUEST_INTERVAL = 15 * 1000 * 60;
@@ -62,8 +62,16 @@ const handleClockLongPress = (e) => {
   }
 };
 
+const renderDateAndDay = () => {
+  const dayOfWeekNode = document.getElementById('dayOfWeek');
+  const currentDateNode = document.getElementById('currentDate');
+
+  dayOfWeekNode.text = getCurrentDay().toUpperCase();
+  currentDateNode.text = String(getCurrentDate());
+};
+
 const initView = () => {
-  let myClock = document.getElementById('clock');
+  const myClock = document.getElementById('clock');
   renderClock(myClock);
   myClock.onclick = navigateTo(routes.calendar);
   myClock.onmousedown = handleClockMouseDown;
@@ -73,6 +81,7 @@ const initView = () => {
   renderSyncTime();
   memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
   display.addEventListener('change', onDisplayStatusChange);
+  renderDateAndDay();
 };
 
 const renderMemoryUsage = (used, total) => {

@@ -2,16 +2,20 @@
   <defs>
     <link rel="stylesheet" href="styles.css" />
   </defs>
-  <text id="clock" class="main-clock" x="90%" y="68" text-length="5" pointer-events="visible">00:00</text>
-  <section y="70">
+  <section>
+    <text id="dayOfWeek" class="day-of-week" x="17%" y="36" text-length="3">--</text>
+    <text id="currentDate" class="current-date" x="17%" y="69" text-length="2">--</text>
+    <text id="clock" class="main-clock" x="90%" y="68" text-length="5" pointer-events="visible">--:--</text>
+  </section>
+  <section y="72">
     <text id="location" class="weather-text weather-location" x="6" y="35" text-length="32">N/A</text>
     <text id="currTemp" class="weather-text" x="6" y="71" text-length="32">No weather data</text>
     <text id="highLowTemp" class="weather-text" x="6" y="107" text-length="32">H:--° L:--°</text>
   </section>
-  <section y="192">
-    <line class="event-marker" x1="12" y1="0" x2="12" y2="96" />
+  <section y="196">
+    <line class="event-marker" x1="12" y1="0" x2="12" y2="90" />
     <text id="calendarEventTime" class="event-time" x="20" y="22" text-length="15">Calendar</text>
-    <textarea id="calendarEventDescription" class="event-title" rows="2" x="20" y="30" text-length="40">No scheduled events for today</textarea>
+    <textarea id="calendarEventDescription" class="event-title" rows="2" x="20" y="26" text-length="70">No scheduled events for today</textarea>
   </section>
   <svg id="logs" class="logs" viewport-fill="fb-black">
     <section>

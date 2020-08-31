@@ -6,3 +6,4 @@ export const COMMUNICATION_ACTIONS = {
   CALENDAR_EVENTS_REQUEST: 'calendar_events_request',
   CALENDAR_EVENTS_RESPONSE: 'calendar_events_response'
 };
+export const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

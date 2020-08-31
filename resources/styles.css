@@ -37,8 +37,19 @@ text {
 }
 
 .event-title {
-  width: 100%;
+  width: 100%-20;
   font-size: 30;
   text-overflow: ellipsis;
   fill: fb-white;
+}
+
+.day-of-week {
+  fill: fb-blue;
+  font-size: 22;
+  text-anchor: middle;
+}
+
+.current-date {
+  font-size: 40;
+  text-anchor: middle;
 }
