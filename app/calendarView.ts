@@ -22,7 +22,7 @@ const renderMemoryUsage = () => {
 
 export const initView = (back: Function) => {
   const button = document.getElementById('button');
-  button.addEventListener('click', onBackButtonClick(back));
+  button.onclick = onBackButtonClick(back);
 
   console.log(`location: ${document.location.pathname}`);
   renderMemoryUsage();
