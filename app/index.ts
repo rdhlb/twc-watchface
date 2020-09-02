@@ -44,11 +44,15 @@ const onDisplayStatusChange = () => {
   }
 };
 
-const renderClock = (container) => {
+const renderClock = () => {
+  const container = document.getElementById('clock');
   clock.granularity = 'seconds';
   clock.ontick = ({ date }) => {
     container.text = getTimeString(date);
   };
+  container.onmousedown = handleClockMouseDown;
+  container.onmouseup = handleClockMouseUp;
+  renderDateAndDay();
 };
 
 const handleClockMouseDown = (e) => {
@@ -88,16 +92,12 @@ const renderCalendarButton = () => {
 };
 
 const initView = () => {
-  const myClock = document.getElementById('clock');
-  renderClock(myClock);
-  myClock.onmousedown = handleClockMouseDown;
-  myClock.onmouseup = handleClockMouseUp;
+  renderClock();
   weatherPollingInervalId = startWeatherPolling();
   calendarPollingInervalId = startCalendarPolling();
   renderSyncTime();
   memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
   display.addEventListener('change', onDisplayStatusChange);
-  renderDateAndDay();
   renderCalendarButton();
 };
 
