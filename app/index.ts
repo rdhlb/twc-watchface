@@ -11,8 +11,10 @@ import {
   getTimeString,
   getCurrentDay,
   getCurrentDate,
-  navigate
+  navigate,
+  startPolling
 } from './utils';
+import { sendSocketMessage, handleSocketMessage } from '../common/utils';
 import { COMMUNICATION_ACTIONS } from '../common/constants';
 
 const WEATHER_REQUEST_INTERVAL = 15 * 1000 * 60;
@@ -93,8 +95,8 @@ const renderCalendarButton = () => {
 
 const initView = () => {
   renderClock();
-  weatherPollingInervalId = startWeatherPolling();
-  calendarPollingInervalId = startCalendarPolling();
+  weatherPollingInervalId = startPolling(fetchWeather, WEATHER_REQUEST_INTERVAL);
+  calendarPollingInervalId = startPolling(fetchCalendarEvents, CALENDAR_REQUEST_INTERVAL);
   renderSyncTime();
   memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
   display.addEventListener('change', onDisplayStatusChange);
@@ -126,12 +128,6 @@ const renderSyncTime = () => {
   lastSyncTimeNode.onclick = () => {
     renderSyncTime();
   };
-};
-
-const sendSocketMessage = (message) => {
-  if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
-    messaging.peerSocket.send(message);
-  }
 };
 
 const fetchWeather = () => {
@@ -189,13 +185,14 @@ messaging.peerSocket.onclose = function (data) {
   socketCloseMessage = `Code: ${data.code}, WasClean: ${data.wasClean}, Time: ${new Date().toTimeString()}`;
 };
 
-messaging.peerSocket.onmessage = ({ data: message }) => {
+messaging.peerSocket.onmessage = ({ data: { command, data } }) => {
   lastMessageReceivedTime = new Date();
-  handleMessage(message);
+  handleSocketMessage({ command, handlersMap: messageHandlersMap, data });
 };
 
 const handleWeatherResponse = (data) => {
   clearTimeout(noWeatherResponseTimeoutId);
+  noWeatherResponseTimeoutId = null;
   const cityNode = document.getElementById('location');
   const currentWeatherNode = document.getElementById('currTemp');
   const highLowTempNode = document.getElementById('highLowTemp');
@@ -230,24 +227,6 @@ const handleCalendarResponse = (data) => {
 const messageHandlersMap = {
   [COMMUNICATION_ACTIONS.WEATHER_RESPONSE]: handleWeatherResponse,
   [COMMUNICATION_ACTIONS.CALENDAR_EVENTS_RESPONSE]: handleCalendarResponse
-};
-
-const handleMessage = ({ command, data }) => {
-  try {
-    messageHandlersMap[command](data);
-  } catch (error) {
-    console.log('No handler found for this type of message!');
-  }
-};
-
-const startWeatherPolling = () => {
-  fetchWeather();
-  return setInterval(fetchWeather, WEATHER_REQUEST_INTERVAL);
-};
-
-const startCalendarPolling = () => {
-  fetchCalendarEvents();
-  return setInterval(fetchCalendarEvents, CALENDAR_REQUEST_INTERVAL);
 };
 
 initView();

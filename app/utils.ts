@@ -32,3 +32,8 @@ export const navigate = ({ loadJs, guiPath }, back, cleanUpView) => () => {
     })
     .catch((e) => console.log(e));
 };
+
+export const startPolling = (fn, interval) => {
+  fn();
+  return setInterval(fn, interval);
+};
