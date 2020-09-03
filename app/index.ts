@@ -13,7 +13,8 @@ import {
   startPolling,
   handleLongPress,
   getDayShort,
-  findByIdAndRender
+  findByIdAndRender,
+  capitalizeFirstLetter
 } from './utils';
 import { sendSocketMessage, handleSocketMessage } from '../common/utils';
 import {
@@ -100,9 +101,7 @@ const initView = () => {
   renderCalendarButton();
 };
 
-const renderMemoryUsage = (used, total) => {
-  findByIdAndRender('mem', `Memory usage: ${used}/${total}`);
-};
+const renderMemoryUsage = (used, total) => findByIdAndRender('mem', `Memory usage: ${used}/${total}`);
 
 const onViewCleanUp = () => {
   clock.granularity = 'off';
@@ -158,37 +157,48 @@ messaging.peerSocket.onmessage = ({ data: { command, data } }) => {
   handleSocketMessage({ command, handlersMap: messageHandlersMap, data });
 };
 
-const handleWeatherResponse = (data) => {
-  clearTimeout(noWeatherResponseTimeoutId);
-  noWeatherResponseTimeoutId = null;
+const renderWeather = ({ location, temp, description, forecast }) => {
   const cityNode = document.getElementById('location');
   const currentWeatherNode = document.getElementById('currTemp');
   const highLowTempNode = document.getElementById('highLowTemp');
 
-  cityNode.text = data.location;
-  currentWeatherNode.text = `${data.temp.toFixed(0)}° ${
-    data.description.charAt(0).toUpperCase() + data.description.slice(1)
-  }`;
-  highLowTempNode.text = `H:${data.temp_min.toFixed(0)}° L:${data.temp_max.toFixed(0)}°`;
+  cityNode.text = location;
+  currentWeatherNode.text = `${temp.toFixed(0)}° ${capitalizeFirstLetter(description)}`;
+  highLowTempNode.text = `H:${forecast.min.toFixed(0)}° L:${forecast.max.toFixed(0)}°`;
+};
+
+const handleWeatherResponse = (data) => {
+  clearTimeout(noWeatherResponseTimeoutId);
+  noWeatherResponseTimeoutId = null;
+
+  renderWeather({
+    location: data.location,
+    temp: data.temp,
+    description: data.description,
+    forecast: { min: data.temp_min, max: data.temp_max }
+  });
+};
+
+const renderNextCalendarEvent = ({ title, start, end }) => {
+  const calendarEventTimeNode = document.getElementById('calendarEventTime');
+  const calendarEventDescriptionNode = document.getElementById('calendarEventDescription');
+
+  calendarEventTimeNode.text = `${getTimeString(start)}-${getTimeString(end)}`;
+  calendarEventDescriptionNode.text = title;
 };
 
 const handleCalendarResponse = (data) => {
-  const calendarEventTimeNode = document.getElementById('calendarEventTime');
-  const calendarEventDescriptionNode = document.getElementById('calendarEventDescription');
-  let calendarEvent;
+  let calendarEvent: { title: string; endDate: string; startDate: string };
   try {
     calendarEvent = JSON.parse(data);
   } catch (error) {
     console.log('Error parsing calendar event', error);
   }
-  const { startDate, endDate, title } = calendarEvent;
+
+  const { startDate, endDate, title } = calendarEvent || {};
 
   if (startDate && endDate && title) {
-    const startTime = new Date(startDate);
-    const endTime = new Date(endDate);
-
-    calendarEventTimeNode.text = `${getTimeString(startTime)}-${getTimeString(endTime)}`;
-    calendarEventDescriptionNode.text = title;
+    renderNextCalendarEvent({ title, start: new Date(startDate), end: new Date(endDate) });
   }
 };
 

@@ -48,3 +48,7 @@ export const findByIdAndRender = (id: string, text: string) => {
 
   return container;
 };
+
+export const capitalizeFirstLetter = ([first, ...rest], locale = 'en') => {
+  return [first.toLocaleUpperCase(locale), ...rest].join('');
+};
