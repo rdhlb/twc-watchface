@@ -1,5 +1,6 @@
 import { memory } from 'system';
 import { vibration } from 'haptics';
+import document from 'document';
 
 import { DAYS_SHORT } from '../common/constants';
 
@@ -39,4 +40,11 @@ export const handleLongPress = (el, callback, options = { timeout: 1500 }) => {
     clearTimeout(longPressTimeoutId);
     longPressTimeoutId = null;
   };
+};
+
+export const findByIdAndRender = (id: string, text: string) => {
+  const container = document.getElementById(id);
+  container.text = text;
+
+  return container;
 };

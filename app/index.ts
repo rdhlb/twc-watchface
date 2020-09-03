@@ -12,7 +12,8 @@ import {
   getDate,
   startPolling,
   handleLongPress,
-  getDayShort
+  getDayShort,
+  findByIdAndRender
 } from './utils';
 import { sendSocketMessage, handleSocketMessage } from '../common/utils';
 import {
@@ -51,11 +52,11 @@ const renderLogs = () => {
 
   if (logsHidden) {
     logsNode.class = 'logs--visible';
-    renderOnOpenTime();
-    renderSocketErrorMessage();
-    renderSocketCloseMessage();
-    renderLastMessageReceivedTime();
-    renderSyncTime();
+    findByIdAndRender('open', `onopen at ${getTimeString(socketOpenTime)}`);
+    findByIdAndRender('error', socketErrorMessage);
+    findByIdAndRender('close', socketCloseMessage);
+    findByIdAndRender('lastMessage', `Last message received at ${getTimeString(lastMessageReceivedTime)}`);
+    findByIdAndRender('lastSyncTime', `Last sync at ${device.lastSyncTime?.toString()}`);
     memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
   } else {
     hideLogs();
@@ -100,8 +101,7 @@ const initView = () => {
 };
 
 const renderMemoryUsage = (used, total) => {
-  const memoryNode = document.getElementById('mem');
-  memoryNode.text = `Memory usage: ${used}/${total}`;
+  findByIdAndRender('mem', `Memory usage: ${used}/${total}`);
 };
 
 const onViewCleanUp = () => {
@@ -116,14 +116,6 @@ const back = () => {
   vibration.start('bump');
   document.replaceSync('./resources/index.gui');
   initView();
-};
-
-const renderSyncTime = () => {
-  const lastSyncTimeNode = document.getElementById('lastSyncTime');
-  lastSyncTimeNode.text = `Last sync at ${device.lastSyncTime?.toString()}`;
-  lastSyncTimeNode.onclick = () => {
-    renderSyncTime();
-  };
 };
 
 const fetchWeather = () => {
@@ -146,26 +138,6 @@ const fetchCalendarEvents = () =>
   sendSocketMessage({
     command: COMMUNICATION_ACTIONS.CALENDAR_EVENTS_REQUEST
   });
-
-const renderOnOpenTime = () => {
-  const openNode = document.getElementById('open');
-  openNode.text = `onopen at ${getTimeString(socketOpenTime)}`;
-};
-
-const renderSocketErrorMessage = () => {
-  const errorNode = document.getElementById('error');
-  errorNode.text = socketErrorMessage;
-};
-
-const renderSocketCloseMessage = () => {
-  const closeNode = document.getElementById('close');
-  closeNode.text = socketCloseMessage;
-};
-
-const renderLastMessageReceivedTime = () => {
-  const lastMessageNode = document.getElementById('lastMessage');
-  lastMessageNode.text = `Last message received at ${getTimeString(lastMessageReceivedTime)}`;
-};
 
 messaging.peerSocket.onopen = () => {
   socketOpenTime = new Date();
