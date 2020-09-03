@@ -9,17 +9,19 @@ import {
   startMemoryMonitoring,
   stopMemoryMonitoring,
   getTimeString,
-  getCurrentDay,
-  getCurrentDate,
-  navigate,
-  startPolling
+  getDate,
+  startPolling,
+  handleLongPress,
+  getDayShort
 } from './utils';
 import { sendSocketMessage, handleSocketMessage } from '../common/utils';
-import { COMMUNICATION_ACTIONS } from '../common/constants';
-
-const WEATHER_REQUEST_INTERVAL = 15 * 1000 * 60;
-const CALENDAR_REQUEST_INTERVAL = 15 * 1000 * 60;
-const WEATHER_RESPONSE_TIMEOUT = 15 * 1000;
+import {
+  COMMUNICATION_ACTIONS,
+  WEATHER_REQUEST_INTERVAL,
+  CALENDAR_REQUEST_INTERVAL,
+  WEATHER_RESPONSE_TIMEOUT
+} from '../common/constants';
+import { navigate, ROUTES } from './navigation';
 
 let weatherPollingInervalId;
 let memoryMonitorIntervalId;
@@ -28,77 +30,71 @@ let socketErrorMessage;
 let socketCloseMessage;
 let lastMessageReceivedTime;
 let calendarPollingInervalId;
-let longPressTimeoutId;
 let noWeatherResponseTimeoutId;
-
-const routes = {
-  calendar: {
-    loadJs: () => import('./calendarView'),
-    guiPath: './resources/calendarView.gui'
-  }
-};
 
 const onDisplayStatusChange = () => {
   if (!display.on) {
     stopMemoryMonitoring(memoryMonitorIntervalId);
-  } else {
-    memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
+    hideLogs();
   }
 };
 
-const renderClock = () => {
-  const container = document.getElementById('clock');
+const hideLogs = () => {
+  const logsNode = document.getElementById('logs');
+  logsNode.class = 'logs';
+  stopMemoryMonitoring(memoryMonitorIntervalId);
+};
+
+const renderLogs = () => {
+  const logsNode = document.getElementById('logs');
+  const logsHidden = logsNode.class === 'logs';
+
+  if (logsHidden) {
+    logsNode.class = 'logs--visible';
+    renderOnOpenTime();
+    renderSocketErrorMessage();
+    renderSocketCloseMessage();
+    renderLastMessageReceivedTime();
+    renderSyncTime();
+    memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
+  } else {
+    hideLogs();
+  }
+};
+
+const initClock = () => {
   clock.granularity = 'seconds';
   clock.ontick = ({ date }) => {
-    container.text = getTimeString(date);
+    renderClock(date);
+    renderDateAndDay(date);
   };
-  container.onmousedown = handleClockMouseDown;
-  container.onmouseup = handleClockMouseUp;
-  renderDateAndDay();
 };
 
-const handleClockMouseDown = (e) => {
-  longPressTimeoutId = setTimeout(() => {
-    vibration.start('bump');
-    const logsNode = document.getElementById('logs');
-    const logsHidden = logsNode.class === 'logs';
+const renderClock = (date) => {
+  const container = document.getElementById('clock');
+  container.text = getTimeString(date);
 
-    if (logsHidden) {
-      logsNode.class = 'logs--visible';
-      renderOnOpenTime();
-      renderSocketErrorMessage();
-      renderSocketCloseMessage();
-      renderLastMessageReceivedTime();
-    } else {
-      logsNode.class = 'logs';
-    }
-  }, 1500);
+  handleLongPress(container, renderLogs);
 };
 
-const handleClockMouseUp = (e) => {
-  clearTimeout(longPressTimeoutId);
-};
-
-const renderDateAndDay = () => {
+const renderDateAndDay = (date) => {
   const dayOfWeekNode = document.getElementById('dayOfWeek');
   const currentDateNode = document.getElementById('currentDate');
 
-  dayOfWeekNode.text = getCurrentDay().toUpperCase();
-  currentDateNode.text = String(getCurrentDate());
+  dayOfWeekNode.text = getDayShort(date).toUpperCase();
+  currentDateNode.text = String(getDate(date));
 };
 
 const renderCalendarButton = () => {
   const hiddenCalButton = document.getElementById('hiddenCalButton');
 
-  hiddenCalButton.onclick = navigate(routes.calendar, back, onViewCleanUp);
+  hiddenCalButton.onclick = navigate(ROUTES.calendar, back, onViewCleanUp);
 };
 
 const initView = () => {
-  renderClock();
+  initClock();
   weatherPollingInervalId = startPolling(fetchWeather, WEATHER_REQUEST_INTERVAL);
   calendarPollingInervalId = startPolling(fetchCalendarEvents, CALENDAR_REQUEST_INTERVAL);
-  renderSyncTime();
-  memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
   display.addEventListener('change', onDisplayStatusChange);
   renderCalendarButton();
 };
@@ -211,7 +207,7 @@ const handleCalendarResponse = (data) => {
   try {
     calendarEvent = JSON.parse(data);
   } catch (error) {
-    console.log('error parsing calendar event', error);
+    console.log('Error parsing calendar event', error);
   }
   const { startDate, endDate, title } = calendarEvent;
 

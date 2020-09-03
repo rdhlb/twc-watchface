@@ -7,3 +7,6 @@ export const COMMUNICATION_ACTIONS = {
   CALENDAR_EVENTS_RESPONSE: 'calendar_events_response'
 };
 export const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+export const WEATHER_REQUEST_INTERVAL = 15 * 1000 * 60;
+export const CALENDAR_REQUEST_INTERVAL = 15 * 1000 * 60;
+export const WEATHER_RESPONSE_TIMEOUT = 15 * 1000;
