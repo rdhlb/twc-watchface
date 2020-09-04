@@ -1,5 +1,4 @@
 import document from 'document';
-import { me as device } from 'device';
 
 import { getTimeString } from '../utils';
 

@@ -17,6 +17,14 @@ class WeatherComponent {
     this.currentWeatherNode.text = `${temp.toFixed(0)}° ${capitalizeFirstLetter(description)}`;
     this.highLowTempNode.text = `H:${forecast.min.toFixed(0)}° L:${forecast.max.toFixed(0)}°`;
   };
+
+  renderLoading = () => {
+    this.currentWeatherNode.text = 'Loading weather...';
+  };
+
+  renderEmptyState = () => {
+    this.currentWeatherNode.text = 'No weather data';
+  };
 }
 
 export default WeatherComponent;

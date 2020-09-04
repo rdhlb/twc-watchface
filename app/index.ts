@@ -13,7 +13,8 @@ import {
   startPolling,
   handleLongPress,
   getDayShort,
-  findByIdAndRender
+  findByIdAndRender,
+  delay
 } from './utils';
 import { sendSocketMessage, handleSocketMessage } from '../common/utils';
 import {
@@ -35,6 +36,7 @@ let socketCloseMessage;
 let lastMessageReceivedTime;
 let calendarPollingInervalId;
 let noWeatherResponseTimeoutId;
+let weatherData;
 
 const onDisplayStatusChange = () => {
   if (!display.on) {
@@ -102,11 +104,13 @@ const renderCalendarButton = () => {
 
 // We need to init view on navigation because in case of document.replaseSync (which is navigation)
 // document is cleaned up and all of the references are lost
-const initView = () => {
+const initView = (shouldInitPolling = false) => {
   initClock();
   addClockLongPressHandler();
-  weatherPollingInervalId = startPolling(fetchWeather, WEATHER_REQUEST_INTERVAL);
-  calendarPollingInervalId = startPolling(fetchCalendarEvents, CALENDAR_REQUEST_INTERVAL);
+  if (shouldInitPolling) {
+    weatherPollingInervalId = startPolling(fetchWeather, WEATHER_REQUEST_INTERVAL);
+    calendarPollingInervalId = startPolling(fetchCalendarEvents, CALENDAR_REQUEST_INTERVAL);
+  }
   display.addEventListener('change', onDisplayStatusChange);
   renderCalendarButton();
 };
@@ -124,17 +128,24 @@ const onViewCleanUp = () => {
 const back = () => {
   vibration.start('bump');
   document.replaceSync('./resources/index.gui');
-  initView();
+  initView(true);
 };
 
 const fetchWeather = () => {
-  const weatherComponent = new WeatherUI();
-  const isWeatherDataAvailable = weatherComponent.currentWeatherNode.text !== 'No weather data';
+  const weatherUI = new WeatherUI();
+  if (weatherData) {
+    weatherUI.render({
+      location: weatherData.location,
+      temp: weatherData.temp,
+      description: weatherData.description,
+      forecast: { min: weatherData.temp_min, max: weatherData.temp_max }
+    });
+  }
 
-  if (!noWeatherResponseTimeoutId && !isWeatherDataAvailable) {
-    weatherComponent.currentWeatherNode.text = 'Loading weather...';
+  if (!noWeatherResponseTimeoutId && !weatherData) {
+    weatherUI.renderLoading();
     noWeatherResponseTimeoutId = setTimeout(() => {
-      weatherComponent.currentWeatherNode.text = 'No weather data';
+      weatherUI.renderEmptyState();
     }, WEATHER_RESPONSE_TIMEOUT);
   }
 
@@ -171,13 +182,17 @@ const handleWeatherResponse = (data) => {
   clearTimeout(noWeatherResponseTimeoutId);
   noWeatherResponseTimeoutId = null;
 
-  const weatherComponent = new WeatherUI();
-  weatherComponent.render({
-    location: data.location,
-    temp: data.temp,
-    description: data.description,
-    forecast: { min: data.temp_min, max: data.temp_max }
-  });
+  if (data) {
+    weatherData = data;
+    const weatherUI = new WeatherUI();
+
+    weatherUI.render({
+      location: weatherData.location,
+      temp: weatherData.temp,
+      description: weatherData.description,
+      forecast: { min: weatherData.temp_min, max: weatherData.temp_max }
+    });
+  }
 };
 
 const handleCalendarResponse = (data) => {

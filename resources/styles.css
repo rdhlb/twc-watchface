@@ -10,7 +10,7 @@ text {
 
 .weather-text {
   font-size: 35;
-  width: 100%;
+  width: 100%-6;
   text-overflow: ellipsis;
 }
 

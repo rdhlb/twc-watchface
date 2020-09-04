@@ -56,3 +56,8 @@ export const findByIdAndRender = (id: string, text: string) => {
 export const capitalizeFirstLetter = ([first, ...rest], locale = 'en') => {
   return [first.toLocaleUpperCase(locale), ...rest].join('');
 };
+
+export const delay = (cb, timeout) =>
+  setTimeout(() => {
+    cb();
+  }, timeout);
