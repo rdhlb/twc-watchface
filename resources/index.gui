@@ -3,19 +3,19 @@
     <link rel="stylesheet" href="styles.css" />
   </defs>
   <section>
-    <text id="dayOfWeek" class="day-of-week" x="17%" y="36" text-length="3">--</text>
+    <text id="dayOfWeek" class="day-of-week accent" x="17%" y="36" text-length="3">--</text>
     <text id="currentDate" class="current-date" x="17%" y="69" text-length="2">--</text>
     <rect id="hiddenCalButton" class="calendar-button" pointer-events="visible" />
     <text id="clock" class="main-clock" x="90%" y="68" text-length="5" pointer-events="visible">--:--</text>
   </section>
   <section y="72">
-    <text id="location" class="weather-text weather-location" x="6" y="35" text-length="32">N/A</text>
+    <text id="location" class="weather-text weather-location accent" x="6" y="35" text-length="32">N/A</text>
     <text id="currTemp" class="weather-text" x="6" y="71" text-length="32">No weather data</text>
     <text id="highLowTemp" class="weather-text" x="6" y="107" text-length="32">H:--° L:--°</text>
   </section>
   <section y="196">
-    <line class="event-marker" x1="12" y1="0" x2="12" y2="90" />
-    <text id="calendarEventTime" class="event-time" x="20" y="22" text-length="15">Calendar</text>
+    <line class="event-marker accent" x1="12" y1="0" x2="12" y2="90" />
+    <text id="calendarEventTime" class="event-time accent" x="20" y="22" text-length="15">Calendar</text>
     <textarea id="calendarEventDescription" class="event-title" rows="2" x="20" y="26" text-length="70">No scheduled events for today</textarea>
   </section>
   <svg y="180" id="logs" class="logs">

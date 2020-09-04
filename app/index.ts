@@ -211,9 +211,19 @@ const handleCalendarResponse = (data) => {
   }
 };
 
+const handleSettingsChange = ({ key, value }: { key: string; value?: string }) => {
+  const accentNodes = document.getElementsByClassName('accent');
+  accentNodes.forEach((node: Element) => {
+    // TODO: extend Element interface or make a PR with corresponding change to types library
+    // @ts-ignore
+    node.style.fill = value;
+  });
+};
+
 const messageHandlersMap = {
   [COMMUNICATION_ACTIONS.WEATHER_RESPONSE]: handleWeatherResponse,
-  [COMMUNICATION_ACTIONS.CALENDAR_EVENTS_RESPONSE]: handleCalendarResponse
+  [COMMUNICATION_ACTIONS.CALENDAR_EVENTS_RESPONSE]: handleCalendarResponse,
+  [COMMUNICATION_ACTIONS.CHANGE_SETTINGS]: handleSettingsChange
 };
 
 initView();

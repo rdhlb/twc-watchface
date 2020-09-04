@@ -26,3 +26,13 @@ export const queryOpenWeather = ({ options, onSuccess }: { options: OptionsType;
       console.log('Error fetching weather: ' + err);
     });
 };
+
+export const queryWeatherData = (onSuccess) => (position) => {
+  const lat = position.coords.latitude;
+  const lon = position.coords.longitude;
+
+  queryOpenWeather({
+    options: { lat, lon },
+    onSuccess
+  });
+};

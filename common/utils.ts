@@ -20,6 +20,6 @@ export const handleSocketMessage = ({
   try {
     handlersMap[command](payload);
   } catch (error) {
-    console.log('Error: No corresponding handler found for the message!');
+    console.log(error);
   }
 };
