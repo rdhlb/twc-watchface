@@ -13,8 +13,7 @@ import {
   startPolling,
   handleLongPress,
   getDayShort,
-  findByIdAndRender,
-  capitalizeFirstLetter
+  findByIdAndRender
 } from './utils';
 import { sendSocketMessage, handleSocketMessage } from '../common/utils';
 import {
@@ -24,6 +23,9 @@ import {
   WEATHER_RESPONSE_TIMEOUT
 } from '../common/constants';
 import { navigate, ROUTES } from './navigation';
+import WeatherUI from './ui/weather';
+import CalendarEventUI from './ui/calendarEvent';
+import Logs from './ui/logs';
 
 let weatherPollingInervalId;
 let memoryMonitorIntervalId;
@@ -36,7 +38,6 @@ let noWeatherResponseTimeoutId;
 
 const onDisplayStatusChange = () => {
   if (!display.on) {
-    stopMemoryMonitoring(memoryMonitorIntervalId);
     hideLogs();
   }
 };
@@ -53,11 +54,14 @@ const renderLogs = () => {
 
   if (logsHidden) {
     logsNode.class = 'logs--visible';
-    findByIdAndRender('open', `onopen at ${getTimeString(socketOpenTime)}`);
-    findByIdAndRender('error', socketErrorMessage);
-    findByIdAndRender('close', socketCloseMessage);
-    findByIdAndRender('lastMessage', `Last message received at ${getTimeString(lastMessageReceivedTime)}`);
-    findByIdAndRender('lastSyncTime', `Last sync at ${device.lastSyncTime?.toString()}`);
+    const logsComponent = new Logs();
+    logsComponent.render({
+      socketOpenTime,
+      socketErrorMessage,
+      socketCloseMessage,
+      lastMessageReceivedTime,
+      lastSyncTime: device.lastSyncTime
+    });
     memoryMonitorIntervalId = startMemoryMonitoring(renderMemoryUsage);
   } else {
     hideLogs();
@@ -72,11 +76,14 @@ const initClock = () => {
   };
 };
 
+const addClockLongPressHandler = () => {
+  const container = document.getElementById('clock');
+  handleLongPress(container, renderLogs);
+};
+
 const renderClock = (date) => {
   const container = document.getElementById('clock');
   container.text = getTimeString(date);
-
-  handleLongPress(container, renderLogs);
 };
 
 const renderDateAndDay = (date) => {
@@ -95,6 +102,7 @@ const renderCalendarButton = () => {
 
 const initView = () => {
   initClock();
+  addClockLongPressHandler();
   weatherPollingInervalId = startPolling(fetchWeather, WEATHER_REQUEST_INTERVAL);
   calendarPollingInervalId = startPolling(fetchCalendarEvents, CALENDAR_REQUEST_INTERVAL);
   display.addEventListener('change', onDisplayStatusChange);
@@ -118,13 +126,13 @@ const back = () => {
 };
 
 const fetchWeather = () => {
-  const currentWeatherNode = document.getElementById('currTemp');
-  const isWeatherDataAvailable = currentWeatherNode.text !== 'No weather data';
+  const weatherComponent = new WeatherUI();
+  const isWeatherDataAvailable = weatherComponent.currentWeatherNode.text !== 'No weather data';
 
   if (!noWeatherResponseTimeoutId && !isWeatherDataAvailable) {
-    currentWeatherNode.text = 'Loading weather...';
+    weatherComponent.currentWeatherNode.text = 'Loading weather...';
     noWeatherResponseTimeoutId = setTimeout(() => {
-      currentWeatherNode.text = 'No weather data';
+      weatherComponent.currentWeatherNode.text = 'No weather data';
     }, WEATHER_RESPONSE_TIMEOUT);
   }
 
@@ -157,34 +165,17 @@ messaging.peerSocket.onmessage = ({ data: { command, data } }) => {
   handleSocketMessage({ command, handlersMap: messageHandlersMap, data });
 };
 
-const renderWeather = ({ location, temp, description, forecast }) => {
-  const cityNode = document.getElementById('location');
-  const currentWeatherNode = document.getElementById('currTemp');
-  const highLowTempNode = document.getElementById('highLowTemp');
-
-  cityNode.text = location;
-  currentWeatherNode.text = `${temp.toFixed(0)}° ${capitalizeFirstLetter(description)}`;
-  highLowTempNode.text = `H:${forecast.min.toFixed(0)}° L:${forecast.max.toFixed(0)}°`;
-};
-
 const handleWeatherResponse = (data) => {
   clearTimeout(noWeatherResponseTimeoutId);
   noWeatherResponseTimeoutId = null;
 
-  renderWeather({
+  const weatherComponent = new WeatherUI();
+  weatherComponent.render({
     location: data.location,
     temp: data.temp,
     description: data.description,
     forecast: { min: data.temp_min, max: data.temp_max }
   });
-};
-
-const renderNextCalendarEvent = ({ title, start, end }) => {
-  const calendarEventTimeNode = document.getElementById('calendarEventTime');
-  const calendarEventDescriptionNode = document.getElementById('calendarEventDescription');
-
-  calendarEventTimeNode.text = `${getTimeString(start)}-${getTimeString(end)}`;
-  calendarEventDescriptionNode.text = title;
 };
 
 const handleCalendarResponse = (data) => {
@@ -198,7 +189,8 @@ const handleCalendarResponse = (data) => {
   const { startDate, endDate, title } = calendarEvent || {};
 
   if (startDate && endDate && title) {
-    renderNextCalendarEvent({ title, start: new Date(startDate), end: new Date(endDate) });
+    const calendarEventComponent = new CalendarEventUI();
+    calendarEventComponent.render({ title, start: new Date(startDate), end: new Date(endDate) });
   }
 };
 

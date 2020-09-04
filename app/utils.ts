@@ -6,7 +6,6 @@ import { DAYS_SHORT } from '../common/constants';
 
 export const startMemoryMonitoring = (render, interval = 1000) =>
   setInterval(() => {
-    console.log('memory monitoring callback');
     render(memory.js.used, memory.js.total);
   }, interval);
 
@@ -28,17 +27,24 @@ export const startPolling = (fn, interval) => {
 
 export const handleLongPress = (el, callback, options = { timeout: 1500 }) => {
   let longPressTimeoutId;
+  let isLongPressSuccessful;
 
   el.onmousedown = () => {
+    console.log('on mouse down');
     longPressTimeoutId = setTimeout(() => {
       vibration.start('bump');
-      callback();
+      isLongPressSuccessful = true;
     }, options.timeout);
   };
 
   el.onmouseup = () => {
-    clearTimeout(longPressTimeoutId);
-    longPressTimeoutId = null;
+    console.log('on mouse up');
+    if (isLongPressSuccessful) {
+      callback();
+      isLongPressSuccessful = false;
+    } else {
+      clearTimeout(longPressTimeoutId);
+    }
   };
 };
 
