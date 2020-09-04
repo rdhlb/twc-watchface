@@ -30,7 +30,6 @@ export const handleLongPress = (el, callback, options = { timeout: 1500 }) => {
   let isLongPressSuccessful;
 
   el.onmousedown = () => {
-    console.log('on mouse down');
     longPressTimeoutId = setTimeout(() => {
       vibration.start('bump');
       isLongPressSuccessful = true;
@@ -38,7 +37,6 @@ export const handleLongPress = (el, callback, options = { timeout: 1500 }) => {
   };
 
   el.onmouseup = () => {
-    console.log('on mouse up');
     if (isLongPressSuccessful) {
       callback();
       isLongPressSuccessful = false;
