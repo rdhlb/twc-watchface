@@ -18,10 +18,12 @@ class Logs {
   }
 
   render = ({ socketOpenTime, socketErrorMessage, socketCloseMessage, lastMessageReceivedTime, lastSyncTime }) => {
-    this.openNode.text = `onopen at ${getTimeString(socketOpenTime)}`;
+    this.openNode.text = `onopen at ${getTimeString(socketOpenTime, { format: 'long' })}`;
     this.errorNode.text = socketErrorMessage;
     this.closeNode.text = socketCloseMessage;
-    this.lastMessageNode.text = `Last message received at ${getTimeString(lastMessageReceivedTime)}`;
+    this.lastMessageNode.text = `Last message received at ${getTimeString(lastMessageReceivedTime, {
+      format: 'long'
+    })}`;
     this.lastSyncTimeNode.text = `Last sync at ${lastSyncTime?.toString()}`;
   };
 }

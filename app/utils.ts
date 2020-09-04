@@ -13,8 +13,13 @@ export const stopMemoryMonitoring = (intervalId) => clearInterval(intervalId);
 
 const formatWithLeadingZero = (num: number, digitsQty = 2) => `0${num}`.slice(-digitsQty);
 
-export const getTimeString = (date: Date) =>
-  [date.getHours(), date.getMinutes()].map((value) => formatWithLeadingZero(value)).join(':');
+export const getTimeString = (date: Date, { format = 'short' }: { format: 'short' | 'long' } = { format: 'short' }) => {
+  const timeShortParts = [date.getHours(), date.getMinutes()];
+
+  return (format === 'short' ? timeShortParts : timeShortParts.concat(date.getSeconds()))
+    .map((value) => formatWithLeadingZero(value))
+    .join(':');
+};
 
 export const getDayShort = (date: Date) => DAYS_SHORT[date.getDay()];
 
@@ -25,24 +30,22 @@ export const startPolling = (fn, interval) => {
   return setInterval(fn, interval);
 };
 
-export const handleLongPress = (el, callback, options = { timeout: 1500 }) => {
+export const handleLongPress = (el: Element, callback, options = { timeout: 1500 }) => {
   let longPressTimeoutId;
-  let isLongPressSuccessful;
 
   el.onmousedown = () => {
     longPressTimeoutId = setTimeout(() => {
       vibration.start('bump');
-      isLongPressSuccessful = true;
+      callback();
     }, options.timeout);
   };
 
+  el.onmouseout = () => {
+    clearTimeout(longPressTimeoutId);
+  };
+
   el.onmouseup = () => {
-    if (isLongPressSuccessful) {
-      callback();
-      isLongPressSuccessful = false;
-    } else {
-      clearTimeout(longPressTimeoutId);
-    }
+    clearTimeout(longPressTimeoutId);
   };
 };
 

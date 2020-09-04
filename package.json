@@ -34,5 +34,6 @@
     "build": "fitbit-build",
     "debug": "fitbit",
     "prettier-format": "prettier --config .prettierrc '{app,common,companion,settings}/**/*.{ts,js,tsx,jsx}' --write"
-  }
+  },
+  "dependencies": {}
 }
