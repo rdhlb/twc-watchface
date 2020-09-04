@@ -13,8 +13,7 @@ import {
   startPolling,
   handleLongPress,
   getDayShort,
-  findByIdAndRender,
-  delay
+  findByIdAndRender
 } from './utils';
 import { sendSocketMessage, handleSocketMessage } from '../common/utils';
 import {
