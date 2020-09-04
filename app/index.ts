@@ -100,6 +100,8 @@ const renderCalendarButton = () => {
   hiddenCalButton.onclick = navigate(ROUTES.calendar, back, onViewCleanUp);
 };
 
+// We need to init view on navigation because in case of document.replaseSync (which is navigation)
+// document is cleaned up and all of the references are lost
 const initView = () => {
   initClock();
   addClockLongPressHandler();
@@ -115,7 +117,7 @@ const onViewCleanUp = () => {
   clock.granularity = 'off';
   clearInterval(weatherPollingInervalId);
   clearInterval(calendarPollingInervalId);
-  stopMemoryMonitoring(memoryMonitorIntervalId);
+  hideLogs();
   display.removeEventListener('change', onDisplayStatusChange);
 };
 
