@@ -12,11 +12,13 @@
     <text id="location" class="weather-text weather-location accent" x="6" y="35" text-length="32">N/A</text>
     <text id="currTemp" class="weather-text" x="6" y="71" text-length="32">No weather data</text>
     <text id="highLowTemp" class="weather-text" x="6" y="107" text-length="32">H:--° L:--°</text>
+    <rect id="hiddenWeatherButton" class="weather-button" y="10" pointer-events="visible" />
   </section>
   <section y="196">
     <line class="event-marker accent" x1="12" y1="0" x2="12" y2="90" />
     <text id="calendarEventTime" class="event-time accent" x="20" y="22" text-length="15">Calendar</text>
     <textarea id="calendarEventDescription" class="event-title" rows="2" x="20" y="26" text-length="70">No scheduled events for today</textarea>
+    <rect id="hiddenAgendaButton" class="agenda-button" pointer-events="visible" />
   </section>
   <svg y="180" id="logs" class="logs">
       <rect width="100%" height="100%" fill="fb-black" />

@@ -4,28 +4,23 @@ import { me as device } from 'device';
 import clock from 'clock';
 import { display } from 'display';
 import { vibration } from 'haptics';
+import { launchApp } from 'system';
 
-import {
-  startMemoryMonitoring,
-  stopMemoryMonitoring,
-  getTimeString,
-  getDate,
-  startPolling,
-  handleLongPress,
-  getDayShort,
-  findByIdAndRender
-} from './utils';
+import { startMemoryMonitoring, stopMemoryMonitoring, startPolling, handleLongPress, findByIdAndRender } from './utils';
 import { sendSocketMessage, handleSocketMessage } from '../common/utils';
 import {
   COMMUNICATION_ACTIONS,
   WEATHER_REQUEST_INTERVAL,
   CALENDAR_REQUEST_INTERVAL,
-  WEATHER_RESPONSE_TIMEOUT
+  WEATHER_RESPONSE_TIMEOUT,
+  FITBIT_AGENDA_APP_UUID,
+  FITBIT_WEATHER_APP_UUID
 } from '../common/constants';
 import { navigate, ROUTES } from './navigation';
 import WeatherUI from './ui/weather';
 import CalendarEventUI from './ui/calendarEvent';
 import Logs from './ui/logs';
+import { renderClock, renderDateAndDay } from './ui/misc';
 
 let weatherPollingInervalId;
 let memoryMonitorIntervalId;
@@ -49,7 +44,7 @@ const hideLogs = () => {
   stopMemoryMonitoring(memoryMonitorIntervalId);
 };
 
-const renderLogs = () => {
+const toggleLogs = () => {
   const logsNode = document.getElementById('logs');
   const logsHidden = logsNode.class === 'logs';
 
@@ -77,22 +72,10 @@ const initClock = () => {
   };
 };
 
-const addClockLongPressHandler = () => {
+const addClockLongPressHandler = (cb) => {
   const container = document.getElementById('clock');
-  handleLongPress(container, renderLogs);
-};
 
-const renderClock = (date) => {
-  const container = document.getElementById('clock');
-  container.text = getTimeString(date);
-};
-
-const renderDateAndDay = (date) => {
-  const dayOfWeekNode = document.getElementById('dayOfWeek');
-  const currentDateNode = document.getElementById('currentDate');
-
-  dayOfWeekNode.text = getDayShort(date).toUpperCase();
-  currentDateNode.text = String(getDate(date));
+  handleLongPress(container, cb);
 };
 
 const renderCalendarButton = () => {
@@ -101,11 +84,41 @@ const renderCalendarButton = () => {
   hiddenCalButton.onclick = navigate(ROUTES.calendar, back, onViewCleanUp);
 };
 
+const openAgendaApp = () => {
+  try {
+    launchApp(FITBIT_AGENDA_APP_UUID);
+  } catch (error) {
+    console.log('Error launching agenda app');
+  }
+};
+
+const openWeatherApp = () => {
+  try {
+    launchApp(FITBIT_WEATHER_APP_UUID);
+  } catch (error) {
+    console.log('Error launching weather app');
+  }
+};
+
+const addAgendaButtonPressHandler = (cb) => {
+  const container = document.getElementById('hiddenAgendaButton');
+
+  container.onclick = cb;
+};
+
+const addWeatherButtonPressHandler = (cb) => {
+  const container = document.getElementById('hiddenWeatherButton');
+
+  container.onclick = cb;
+};
+
 // We need to init view on navigation because in case of document.replaseSync (which is navigation)
 // document is cleaned up and all of the references are lost
 const initView = (shouldInitPolling = false) => {
   initClock();
-  addClockLongPressHandler();
+  addClockLongPressHandler(toggleLogs);
+  addAgendaButtonPressHandler(openAgendaApp);
+  addWeatherButtonPressHandler(openWeatherApp);
   if (shouldInitPolling) {
     weatherPollingInervalId = startPolling(fetchWeather, WEATHER_REQUEST_INTERVAL);
     calendarPollingInervalId = startPolling(fetchCalendarEvents, CALENDAR_REQUEST_INTERVAL);
