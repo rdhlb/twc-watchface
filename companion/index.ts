@@ -1,7 +1,7 @@
 import * as messaging from 'messaging';
 
 import { getCurrentPosition } from './location';
-import { queryWeatherData } from './weather';
+import { fetchWeather } from './weather';
 import { COMMUNICATION_ACTIONS } from '../common/constants';
 import { sendSocketMessage, handleSocketMessage } from '../common/utils';
 import { getCalendarEvents } from './calendar';
@@ -14,8 +14,18 @@ const sendCalendarEvents = (data) =>
 
 const sendSettings = (data) => sendSocketMessage({ command: COMMUNICATION_ACTIONS.CHANGE_SETTINGS, data });
 
+const handleWeatherRequest = async () => {
+  try {
+    const { coords } = await getCurrentPosition();
+    const weatherData = await fetchWeather(coords);
+    sendWeatherData(weatherData);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const messageHandlersMap = {
-  [COMMUNICATION_ACTIONS.WEATHER_REQUEST]: () => getCurrentPosition({ onSuccess: queryWeatherData(sendWeatherData) }),
+  [COMMUNICATION_ACTIONS.WEATHER_REQUEST]: handleWeatherRequest,
   [COMMUNICATION_ACTIONS.CALENDAR_EVENTS_REQUEST]: () => getCalendarEvents({ onSuccess: sendCalendarEvents })
 };
 

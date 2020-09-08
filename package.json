@@ -32,7 +32,7 @@
   },
   "scripts": {
     "build": "fitbit-build",
-    "debug": "fitbit",
+    "debug": "fitbit DEBUG=1",
     "prettier-format": "prettier --config .prettierrc '{app,common,companion,settings}/**/*.{ts,js,tsx,jsx}' --write"
   },
   "dependencies": {}

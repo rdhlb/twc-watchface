@@ -21,6 +21,7 @@ import WeatherUI from './ui/weather';
 import CalendarEventUI from './ui/calendarEvent';
 import Logs from './ui/logs';
 import { renderClock, renderDateAndDay } from './ui/misc';
+import { WeatherResponseDataType } from '../common/types';
 
 let weatherPollingInervalId;
 let memoryMonitorIntervalId;
@@ -30,7 +31,7 @@ let socketCloseMessage;
 let lastMessageReceivedTime;
 let calendarPollingInervalId;
 let noWeatherResponseTimeoutId;
-let weatherData;
+let weatherData: WeatherResponseDataType;
 
 const onDisplayStatusChange = () => {
   if (!display.on) {
@@ -147,10 +148,10 @@ const fetchWeather = () => {
   const weatherUI = new WeatherUI();
   if (weatherData) {
     weatherUI.render({
-      location: weatherData.location,
-      temp: weatherData.temp,
-      description: weatherData.description,
-      forecast: { min: weatherData.temp_min, max: weatherData.temp_max }
+      location: weatherData.locationName,
+      temp: weatherData.currentConditions.temp,
+      description: weatherData.currentConditions.description,
+      forecast: { min: weatherData.dailyForecastTemp.min, max: weatherData.dailyForecastTemp.max }
     });
   }
 
@@ -190,7 +191,7 @@ messaging.peerSocket.onmessage = ({ data: { command, data } }) => {
   handleSocketMessage({ command, handlersMap: messageHandlersMap, data });
 };
 
-const handleWeatherResponse = (data) => {
+const handleWeatherResponse = (data: WeatherResponseDataType) => {
   clearTimeout(noWeatherResponseTimeoutId);
   noWeatherResponseTimeoutId = null;
 
@@ -199,10 +200,10 @@ const handleWeatherResponse = (data) => {
     const weatherUI = new WeatherUI();
 
     weatherUI.render({
-      location: weatherData.location,
-      temp: weatherData.temp,
-      description: weatherData.description,
-      forecast: { min: weatherData.temp_min, max: weatherData.temp_max }
+      location: weatherData.locationName,
+      temp: weatherData.currentConditions.temp,
+      description: weatherData.currentConditions.description,
+      forecast: { min: weatherData.dailyForecastTemp.min, max: weatherData.dailyForecastTemp.max }
     });
   }
 };

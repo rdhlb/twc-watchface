@@ -1,38 +1,20 @@
-import { OPENWEATHERMAP_API_KEY, OPENWEATHERMAP_ENDPOINT } from '../common/constants';
+import { WEATHER_API_ENDPOINT } from '../common/constants';
+import { WeatherResponseDataType } from '../common/types';
 
-type OptionsType = {
-  lat: number;
-  lon: number;
-  units?: 'metric' | 'imperial';
-};
+export const fetchWeather = async (coords: {
+  latitude: number;
+  longitude: number;
+}): Promise<WeatherResponseDataType> => {
+  const lat = coords.latitude;
+  const lon = coords.longitude;
 
-export const queryOpenWeather = ({ options, onSuccess }: { options: OptionsType; onSuccess: (any) => void }) => {
-  // TODO: add query bilder from JS object
-  const locationQuery = `?lat=${options.lat}&lon=${options.lon}`;
-  const URL = OPENWEATHERMAP_ENDPOINT + locationQuery + '&units=metric' + '&APPID=' + OPENWEATHERMAP_API_KEY;
-  // console.log(URL);
-  fetch(URL)
-    .then(function (response) {
-      response.json().then(function (data) {
-        // console.log(JSON.stringify(data, null, 1));
-        onSuccess({
-          ...data.main,
-          location: data.name,
-          description: data.weather?.[0]?.description
-        });
-      });
-    })
-    .catch(function (err) {
-      console.log('Error fetching weather: ' + err);
-    });
-};
+  const query = `?coordinates=${lat},${lon}&units=metric`;
+  const URL = WEATHER_API_ENDPOINT + query;
+  const response = await fetch(URL);
 
-export const queryWeatherData = (onSuccess) => (position) => {
-  const lat = position.coords.latitude;
-  const lon = position.coords.longitude;
+  if (!response.ok) {
+    throw new Error(`Error getting weather data from server. Code: ${response.status}`);
+  }
 
-  queryOpenWeather({
-    options: { lat, lon },
-    onSuccess
-  });
+  return await response.json();
 };

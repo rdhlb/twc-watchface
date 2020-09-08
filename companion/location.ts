@@ -1,8 +1,6 @@
-import { geolocation } from 'geolocation';
+import { geolocation, PositionCallback, PositionErrorCallback } from 'geolocation';
 
-export const getCurrentPosition = ({ onSuccess, onError = onGetPositionError }) =>
-  geolocation.getCurrentPosition(onSuccess, onError, { timeout: 60 * 1000 });
-
-const onGetPositionError = (error) => {
-  console.log('Error: ' + error.code, 'Message: ' + error.message);
-};
+export const getCurrentPosition = (): Promise<Position> =>
+  new Promise((resolve, reject) => {
+    geolocation.getCurrentPosition(resolve, reject, { timeout: 60 * 1000 });
+  });
