@@ -20,7 +20,7 @@ const handleWeatherRequest = async () => {
     const weatherData = await fetchWeather(coords);
     sendWeatherData(weatherData);
   } catch (error) {
-    console.log(error);
+    console.log(`Error handling weather request: ${error}`);
   }
 };
 

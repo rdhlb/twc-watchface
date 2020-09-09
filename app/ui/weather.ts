@@ -15,7 +15,7 @@ class WeatherComponent {
   render = ({ location, temp, description, forecast }) => {
     this.cityNode.text = location;
     this.currentWeatherNode.text = `${temp.toFixed(0)}° ${capitalizeFirstLetter(description)}`;
-    this.highLowTempNode.text = `H:${forecast.min.toFixed(0)}° L:${forecast.max.toFixed(0)}°`;
+    this.highLowTempNode.text = `H:${forecast.max.toFixed(0)}° L:${forecast.min.toFixed(0)}°`;
   };
 
   renderLoading = () => {
