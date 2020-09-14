@@ -1,4 +1,4 @@
-import { geolocation, PositionCallback, PositionErrorCallback } from 'geolocation';
+import { geolocation } from 'geolocation';
 
 export const getCurrentPosition = (): Promise<Position> =>
   new Promise((resolve, reject) => {
