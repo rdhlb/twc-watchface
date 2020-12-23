@@ -1,7 +1,6 @@
 import { getTimeString } from '../utils';
 
 import document from 'document';
-
 class CalendarEventComponent {
   calendarEventTimeNode: Element;
   calendarEventDescriptionNode: Element;
