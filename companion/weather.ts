@@ -10,7 +10,11 @@ export const fetchWeather = async (coords: {
 
   const query = `?coordinates=${lat},${lon}&units=metric`;
   const URL = WEATHER_API_ENDPOINT + query;
-  const response = await fetch(URL);
+  const response = await fetch(URL, {
+    headers: {
+      'x-api-key': 'YOUR API KEY'
+    }
+  });
 
   if (!response.ok) {
     throw new Error(`Error getting weather data from server. Code: ${response.status}`);
